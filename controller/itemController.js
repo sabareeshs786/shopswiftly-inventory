@@ -15,8 +15,17 @@ const getItems = async (req, res) => {
         : true;
     const brand = req.query.brand?.split(',') || ["apple"];
     const sort = req.query.sort || "low-to-high";
-    const sortOrder = {}
-    sortOrder[sort] = 1;
+    const sortOrder = {};
+    if(sort.toLowerCase() == "low-to-high"){
+        sortOrder.price = 1
+    }
+    else if(sort.toLowerCase() == "high-to-low"){
+        sortOrder.price = -1;
+    }
+    else{
+        sortOrder.price = 1;
+    }
+
     const minPrice = queryParams['min-price'] || '';
     const maxPrice = queryParams['max-price'] || '';
     let mongodbQuery = {};
@@ -53,10 +62,18 @@ const getItems = async (req, res) => {
 
 const getMinMax = async (req, res) => {
     const category = req.params.category || "mobiles";
-    const brand = req.query.brand?.split(',') || ["apple"];
+    let mongodbQuery = {};
+    let brand = req.query.brand;
+    if(Boolean(brand)){
+        brand = brand?.split(',');
+        mongodbQuery.brand = { $in: brand};
+    }
+    else{
+        mongodbQuery = {}
+    }
     if (category.toLowerCase() == "mobiles") {
         try {
-            const mongodbDocs = await Mobile.find({ brand: { $in: brand } });
+            const mongodbDocs = await Mobile.find(mongodbQuery);
             const mongodbDocIds = mongodbDocs.map(doc => doc._id);
             const result = await Mobile.aggregate([
                 {
@@ -72,8 +89,6 @@ const getMinMax = async (req, res) => {
                     }
                 }]);
             const { minValue, maxValue } = result[0];
-            console.log('Minimum Value:', minValue);
-            console.log('Maximum Value:', maxValue);
             res.json({ minValue, maxValue });
         } catch (error) {
             console.log(error);
