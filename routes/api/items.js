@@ -10,4 +10,8 @@ router.route('/minmax/:category')
 
 router.route('/all-brands/:category')
     .get(itemController.getAllBrands);
+
+router.route('/get-pagination-data/:category')
+    .get(itemController.getMetaDataForPagination);
+
 module.exports = router;

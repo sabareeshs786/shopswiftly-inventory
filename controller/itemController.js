@@ -6,30 +6,30 @@ const Mobile = require('../models/mobiles');
 const getItems = async (req, res) => {
     const parsedUrl = url.parse(req.url);
     const queryParams = querystring.parse(parsedUrl.query);
-
-    const category = req.params.category || "mobiles";
-    const preview = req.query.preview ?
-        String(req.query.preview).toLowerCase() == "true"
-            ? true : String(req.query.preview).toLowerCase() == "false" ?
-                false : true
-        : true;
+    const category = req.params.category?.toLowerCase() || "mobiles";
+    const preview = req.query.preview ? String(req.query.preview).toLowerCase() == "true" ? true : String(req.query.preview).toLowerCase() == "false" ? false : true : true;
     const brand = req.query.brand?.split(',') || ["apple"];
+    const minPrice = queryParams['min-price'] || '';
+    const maxPrice = queryParams['max-price'] || '';
     const sort = req.query.sort || "low-to-high";
     const sortOrder = {};
-    if(sort.toLowerCase() == "low-to-high"){
+    const page = Number.parseInt(queryParams['page'] || '1');
+    const pageSize = Number.parseInt(queryParams['pageSize'] || '5');
+    const skip = (page - 1) * pageSize;
+
+    if (sort.toLowerCase() == "low-to-high") {
         sortOrder.price = 1
     }
-    else if(sort.toLowerCase() == "high-to-low"){
+    else if (sort.toLowerCase() == "high-to-low") {
         sortOrder.price = -1;
     }
-    else{
+    else {
         sortOrder.price = 1;
     }
 
-    const minPrice = queryParams['min-price'] || '';
-    const maxPrice = queryParams['max-price'] || '';
     let mongodbQuery = {};
     let priceConditions = [];
+
     if (Boolean(minPrice) && Boolean(maxPrice)) {
         priceConditions.push({ price: { $gte: minPrice } });
         priceConditions.push({ price: { $lte: maxPrice } });
@@ -40,17 +40,20 @@ const getItems = async (req, res) => {
     else if (Boolean(maxPrice)) {
         priceConditions.push({ price: { $lte: maxPrice } });
     }
+
     mongodbQuery = priceConditions.length > 0 ? { $and: priceConditions } : {};
     mongodbQuery.brand = { $in: brand };
+
+    const fieldsToRetrieve = ["_id", "name", "price", "brand", "ram", "storage", "imageUrl"];
 
     if (category == "mobiles") {
         try {
             if (preview) {
-                const items = await Mobile.find(mongodbQuery).limit(5).sort(sortOrder);
+                const items = await Mobile.find(mongodbQuery).select(fieldsToRetrieve.join(' ')).limit(5).sort(sortOrder);
                 if (!items) return res.status(204).json({ 'message': `No items found for the category ${category}` });
                 res.json(items);
             } else {
-                const items = await Mobile.find(mongodbQuery).limit(20).sort(sortOrder);
+                const items = await Mobile.find(mongodbQuery).select(fieldsToRetrieve.join(' ')).skip(skip).limit(pageSize).sort(sortOrder);
                 if (!items) return res.status(204).json({ 'message': `No items found for the category ${category}` });
                 res.json(items);
             }
@@ -64,11 +67,11 @@ const getMinMax = async (req, res) => {
     const category = req.params.category || "mobiles";
     let mongodbQuery = {};
     let brand = req.query.brand;
-    if(Boolean(brand)){
+    if (Boolean(brand)) {
         brand = brand?.split(',');
-        mongodbQuery.brand = { $in: brand};
+        mongodbQuery.brand = { $in: brand };
     }
-    else{
+    else {
         mongodbQuery = {}
     }
     if (category.toLowerCase() == "mobiles") {
@@ -108,4 +111,43 @@ const getAllBrands = async (req, res) => {
     }
 }
 
-module.exports = { getItems, getMinMax, getAllBrands };
+const getMetaDataForPagination = async (req, res) => {
+    try {
+        const category = req.params.category || "mobiles";
+        const parsedUrl = url.parse(req.url);
+        const queryParams = querystring.parse(parsedUrl.query);
+        const brand = queryParams['brand']?.split(',') || ["apple"];
+        const minPrice = queryParams['min-price'] || '';
+        const maxPrice = queryParams['max-price'] || '';
+        let mongodbQuery = {};
+        let priceConditions = [];
+
+        if (Boolean(minPrice) && Boolean(maxPrice)) {
+            priceConditions.push({ price: { $gte: minPrice } });
+            priceConditions.push({ price: { $lte: maxPrice } });
+        }
+        else if (Boolean(minPrice)) {
+            priceConditions.push({ price: { $gte: minPrice } })
+        }
+        else if (Boolean(maxPrice)) {
+            priceConditions.push({ price: { $lte: maxPrice } });
+        }
+        mongodbQuery = priceConditions.length > 0 ? { $and: priceConditions } : {};
+        mongodbQuery.brand = { $in: brand };
+
+        if (category === 'mobiles') {
+            const countOfDocs = await Mobile.countDocuments(mongodbQuery);
+            if (!countOfDocs) return res.status(204).json({ 'message': `No items found for the category ${category}` });
+            res.json({ countOfDocs });
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const getItem = (req, res) => {
+    const id = req.query.id;
+    
+}
+
+module.exports = { getItems, getMinMax, getAllBrands, getMetaDataForPagination, getItem};
