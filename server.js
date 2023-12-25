@@ -33,6 +33,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 app.use('/items', require('./routes/api/items'));
+app.use('/item', require('./routes/api/item'));
 
 app.post('/upload', upload.single('image'), async (req, res) => {
   try {

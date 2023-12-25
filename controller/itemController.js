@@ -1,5 +1,6 @@
 const url = require('url');
 const querystring = require('querystring');
+const mongoose = require('mongoose');
 
 const Mobile = require('../models/mobiles');
 
@@ -145,9 +146,21 @@ const getMetaDataForPagination = async (req, res) => {
     }
 }
 
-const getItem = (req, res) => {
+const getItem = async (req, res) => {
     const id = req.query.id;
-    
+    const category = req.params.category?.toLowerCase() || "mobiles";
+    if (category == "mobiles") {
+        try {
+            const itemId  = new mongoose.Types.ObjectId(String(id));
+            const item = await Mobile.findById(itemId).exec();
+            if (!item) return res.status(204).json({ 'message': `No item found` });
+            res.json(item);
+        } catch (error) {
+            console.log(error);
+            res.status(400);
+        }
+    }
+
 }
 
 module.exports = { getItems, getMinMax, getAllBrands, getMetaDataForPagination, getItem};
