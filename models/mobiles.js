@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const MobileSchema = {
+const mobileSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -12,12 +12,17 @@ const MobileSchema = {
         required: true,
         unique: false
     },
-    price : {
+    price: {
         type: Number,
         required: true,
         unique: false
     },
     brand: {
+        type: String,
+        required: true,
+        unique: false
+    },
+    category: {
         type: String,
         required: true,
         unique: false
@@ -42,6 +47,9 @@ const MobileSchema = {
         required: true,
         unique: true
     },
-}
+},{timestamps: true});
 
-module.exports = mongoose.model('Mobile', MobileSchema);
+mobileSchema.index({ name: 1 }, { unique: true });
+mobileSchema.index({ imageUrl: 1 }, { unique: true });
+
+module.exports = mongoose.model('Mobile', mobileSchema);
