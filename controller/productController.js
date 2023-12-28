@@ -1,10 +1,10 @@
 const url = require('url');
 const querystring = require('querystring');
 const mongoose = require('mongoose');
-
+const { getNonNullUndefinedProperties } = require('./utils');
 const Mobile = require('../models/mobiles');
 
-const getItems = async (req, res) => {
+const getProducts = async (req, res) => {
     const parsedUrl = url.parse(req.url);
     const queryParams = querystring.parse(parsedUrl.query);
     const category = req.params.category?.toLowerCase() || "mobiles";
@@ -146,12 +146,12 @@ const getMetaDataForPagination = async (req, res) => {
     }
 }
 
-const getItem = async (req, res) => {
+const getProduct = async (req, res) => {
     const id = req.query.id;
     const category = req.params.category?.toLowerCase() || "mobiles";
     if (category == "mobiles") {
         try {
-            const itemId  = new mongoose.Types.ObjectId(String(id));
+            const itemId = new mongoose.Types.ObjectId(String(id));
             const item = await Mobile.findById(itemId).exec();
             if (!item) return res.status(204).json({ 'message': `No item found` });
             res.json(item);
@@ -163,4 +163,20 @@ const getItem = async (req, res) => {
 
 }
 
-module.exports = { getItems, getMinMax, getAllBrands, getMetaDataForPagination, getItem};
+const addProduct = async (req, res) => {
+    try {
+        const { name, description, price, brand, ram, storage, batteryCapacity } = req.body;
+        const imageUrl = req.file.filename;
+        const notNullUndefined = getNonNullUndefinedProperties({ name, description, price, brand, ram, storage, batteryCapacity, imageUrl });
+
+        const newImage = new Mobile(notNullUndefined);
+        await newImage.save();
+
+        res.status(201).json({ message: 'Product saved successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+module.exports = { getProducts, getMinMax, getAllBrands, getMetaDataForPagination, getProduct, addProduct };
