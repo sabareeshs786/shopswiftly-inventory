@@ -6,7 +6,7 @@ const verifyRefreshToken = async (req, res, next) => {
         const roles = req.roles;
         const foundUser = await User.findOne({ email: email }).exec();
         if (!foundUser || !foundUser.refreshToken) return res.sendStatus(401);
-        next()
+        next();
     } catch (error) {
 
     }
