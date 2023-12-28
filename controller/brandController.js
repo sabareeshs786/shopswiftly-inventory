@@ -1,6 +1,6 @@
 const url = require('url');
 const querystring = require('querystring');
-const { isvalidInputData } = require('../utils');
+const { isvalidInputData } = require('../utils/utilFunctions');
 const Brand = require('../models/brands');
 
 const getBrands = async (req, res) => {
