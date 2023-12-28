@@ -14,11 +14,11 @@ function getNonNullUndefinedProperties(obj) {
 }
 
 function isvalidInputData(dataObject) {
-  for (const prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      const value = obj[prop];
+  for (const prop in dataObject) {
+    if (dataObject.hasOwnProperty(prop)) {
+      const value = dataObject[prop];
       if (!Boolean(value)) {
-        return false
+        return false;
       }
     }
   }

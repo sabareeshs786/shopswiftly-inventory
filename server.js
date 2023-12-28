@@ -5,7 +5,6 @@ const multer = require('multer');
 const path = require('path');
 const connectDB = require('./config/dbConnect');
 const Mobile = require('./models/mobiles');
-const Brand = require('./models/brands');
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
 const { getNonNullUndefinedProperties } = require('./utils');
@@ -29,12 +28,14 @@ const upload = multer({ storage: storage });
 const Image = Mobile;
 
 app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// For static files
 app.use('/uploads', express.static('uploads'));
+
 app.use('/items', require('./routes/api/itemsApi'));
 app.use('/item', require('./routes/api/itemApi'));
-
 app.use('/brands', require('./routes/api/brandsApi'));
 
 app.post('/upload', upload.single('image'), async (req, res) => {
@@ -46,7 +47,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     const newImage = new Image(notNullUndefined);
     await newImage.save();
 
-    res.status(201).json({ message: 'Image uploaded successfully' });
+    res.status(201).json({ message: 'Product saved successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -54,6 +55,5 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 });
 
 mongoose.connection.once('open', () => {
-  console.log('Connected to MongoDB');
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });
