@@ -34,8 +34,8 @@ app.use(express.urlencoded({ extended: true }));
 // For static files
 app.use('/uploads', express.static('uploads'));
 
-app.use('/items', require('./routes/api/itemsApi'));
-app.use('/item', require('./routes/api/itemApi'));
+app.use('/products', require('./routes/api/itemsApi'));
+app.use('/product', require('./routes/api/itemApi'));
 app.use('/brands', require('./routes/api/brandsApi'));
 
 app.post('/upload', upload.single('image'), async (req, res) => {
