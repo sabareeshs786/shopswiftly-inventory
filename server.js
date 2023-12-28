@@ -32,7 +32,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // For static files
-app.use('/uploads', express.static('uploads'));
+app.use('/images', express.static('images'));
 
 app.use('/products', require('./routes/api/itemsApi'));
 app.use('/product', require('./routes/api/itemApi'));
