@@ -122,7 +122,4 @@ const tabletSchema = new Schema({
     }
 }, { timestamps: true });
 
-tabletSchema.index({ name: 1 }, { unique: true });
-tabletSchema.index({ imageUrl: 1 }, { unique: true });
-
 module.exports = mongoose.model('Tablet', tabletSchema);

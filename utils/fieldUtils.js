@@ -1,28 +1,31 @@
 const commonFields = {
+    skuid: {
+        type: Number,
+        required: true,
+        unique: true
+    },
     imageUrl: {
         type: [String],
         required: true,
         unique: true
     },
-    name: {
+    // Display name
+    disname: {
         type: String,
         required: true,
         unique: true
     },
-    description: {
+    // Description of the product
+    desc: {
         type: String,
         required: true,
         default: null
     },
-    brand: {
+    // Brand-Category code
+    bcCode: {
         type: String,
         required: true,
     },
-    category: {
-        type: String,
-        required: true,
-    },
-    // sp - Selling Price
     sp: {
         type: Number,
         required: true,
@@ -42,15 +45,17 @@ const commonFields = {
     },
     rating: {
         type: Number,
-        required: true,
-        default: null
+        default: 0
     },
-    numberOfRatings: {
+    noOfRatings: {
         type: Number,
         default: 0
     },
     reviews: {
         type: String,
+    },
+    noOfReviews: {
+        type: Number
     },
     keywords: {
         type: String,
@@ -58,7 +63,8 @@ const commonFields = {
     },
     highlights: {
         type: [String],
-        required: true
+        required: false,
+        default: null
     },
 }
 

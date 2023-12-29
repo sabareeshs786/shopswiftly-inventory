@@ -1,67 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const { commonFields } = require('../../../utils/fieldUtils');
 
 const mobileSchema = new Schema({
-    imageUrl: {
-        type: [String],
-        required: true,
-        unique: true
-    },
-    name: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    description: {
-        type: String,
-        required: true,
-        default: null
-    },
-    brand: {
-        type: String,
-        required: true,
-    },
-    category: {
-        type: String,
-        required: true,
-    },
-    sp: {
-        type: Number,
-        required: true,
-    },
-    mp: {
-        type: Number,
-        required: true
-    },
-    offer: {
-        type: Number,
-    },
-    currency: {
-        type: String,
-        required: true,
-        enum: ['INR', 'USD'],
-        default: "INR"
-    },
-    rating: {
-        type: Number,
-        required: true,
-        default: null
-    },
-    numberOfRatings: {
-        type: Number,
-        default: 0
-    },
-    reviews: {
-        type: String,
-    },
-    keywords: {
-        type: String,
-        required: true
-    },
-    highlights: {
-        type: [String],
-        required: true
-    },
+    ...commonFields,
     specifications: {
         general: {
             modelNo: {
@@ -180,8 +122,5 @@ const mobileSchema = new Schema({
         type: String
     }
 }, { timestamps: true });
-
-mobileSchema.index({ name: 1 }, { unique: true });
-mobileSchema.index({ imageUrl: 1 }, { unique: true });
 
 module.exports = mongoose.model('Mobile', mobileSchema);
