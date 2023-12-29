@@ -1,67 +1,9 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const { commonFields } = require('../../../utils/fieldUtils');
 
-const mobileSchema = new Schema({
-    imageUrl: {
-        type: [String],
-        required: true,
-        unique: true
-    },
-    name: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    description: {
-        type: String,
-        required: true,
-        default: null
-    },
-    brand: {
-        type: String,
-        required: true,
-    },
-    category: {
-        type: String,
-        required: true,
-    },
-    sp: {
-        type: Number,
-        required: true,
-    },
-    mp: {
-        type: Number,
-        required: true
-    },
-    offer: {
-        type: Number,
-    },
-    currency: {
-        type: String,
-        required: true,
-        enum: ['INR', 'USD'],
-        default: "INR"
-    },
-    rating: {
-        type: Number,
-        required: true,
-        default: null
-    },
-    numberOfRatings: {
-        type: Number,
-        default: 0
-    },
-    reviews: {
-        type: String,
-    },
-    keywords: {
-        type: String,
-        required: true
-    },
-    highlights: {
-        type: [String],
-        required: true
-    },
+const tabletSchema = new Schema({
+    ...commonFields,
     specifications: {
         general: {
             modelNo: {
@@ -75,11 +17,14 @@ const mobileSchema = new Schema({
             color: {
                 type: String
             },
+            idealUsage: {
+                type: [String]
+            }
         },
         display: {
             screenSize: {
                 size: {
-                    type: [Number], // [width, height]
+                    type: Number,
                     required: true
                 },
                 unit: {
@@ -96,7 +41,12 @@ const mobileSchema = new Schema({
             },
         },
         os: {
-            type: String
+            name: {
+                type: String
+            },
+            version:{
+                type: Number
+            }
         },
         processor: {
             brand: {
@@ -104,9 +54,6 @@ const mobileSchema = new Schema({
             },
             model: {
                 type: String
-            },
-            numberOfCores: {
-                type: Number
             },
             clockSpeed: {
                 type: Number
@@ -137,10 +84,10 @@ const mobileSchema = new Schema({
             },
         },
         camera: {
-            front: {
+            primary: {
                 type: [Number],
             },
-            rear: {
+            secondary: {
                 type: [Number],
             }
         },
@@ -168,20 +115,14 @@ const mobileSchema = new Schema({
     features: {
         type: String
     },
-    browseType: {
-        type: String,
-        enum: ['Smartphones', 'Featured mobiles', 'Tablets'],
-        default: 'Smartphones'
-    },
-    manufacturerWarranty: {
-        type: String
-    },
-    inBoxWarrenty: {
-        type: String
+    warranty: {
+        period: {
+            type: Number
+        }
     }
 }, { timestamps: true });
 
-mobileSchema.index({ name: 1 }, { unique: true });
-mobileSchema.index({ imageUrl: 1 }, { unique: true });
+tabletSchema.index({ name: 1 }, { unique: true });
+tabletSchema.index({ imageUrl: 1 }, { unique: true });
 
-module.exports = mongoose.model('Mobile', mobileSchema);
+module.exports = mongoose.model('Tablet', tabletSchema);

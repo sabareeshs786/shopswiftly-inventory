@@ -2,15 +2,11 @@ const mongoose = require('mongoose');
 const { commonFields } = require('../../../utils/fieldUtils');
 const Schema = mongoose.Schema;
 
-const laptopSchema = new Schema({
+const desktopSchema = new Schema({
     ...commonFields,
     specifications: {
         general: {
             salesPackage: {
-                type: String,
-                required: true
-            },
-            modelNo: {
                 type: String,
                 required: true
             },
@@ -27,15 +23,6 @@ const laptopSchema = new Schema({
             series: {
                 type: String
             },
-            type: {
-                type: String
-            },
-            suitableFor: {
-                type: String
-            },
-            batteryCell: {
-                type: Number
-            }
         },
         processor: {
             brand: {
@@ -52,9 +39,6 @@ const laptopSchema = new Schema({
             },
             clockSpeed: {
                 type: Number
-            },
-            variant: {
-                type: String
             },
             graphicProcessor: {
                 type: String
@@ -100,7 +84,7 @@ const laptopSchema = new Schema({
                     default: 'GB'
                 },
             },
-            emmcStorage: {
+            hdd: {
                 contains: {
                     type: Boolean,
                     default: false
@@ -114,7 +98,11 @@ const laptopSchema = new Schema({
                     default: 'GB'
                 },
             },
-            internalStorage: {
+            emmcStorage: {
+                contains: {
+                    type: Boolean,
+                    default: false
+                },
                 size: {
                     type: Number,
                 },
@@ -122,7 +110,7 @@ const laptopSchema = new Schema({
                     type: String,
                     enum: ['GB', 'MB'],
                     default: 'GB'
-                }
+                },
             },
         },
         os: {
@@ -174,17 +162,6 @@ const laptopSchema = new Schema({
         webcamera: {
             type: Number
         },
-        batteryCapacity: {
-            size: {
-                type: Number,
-                required: true
-            },
-            unit: {
-                type: String,
-                enum: ['mAh'],
-                default: 'mAh'
-            }
-        },
         warranty: {
             summary: {
                 type: String
@@ -199,4 +176,4 @@ const laptopSchema = new Schema({
     },
 });
 
-module.exports = mongoose.model('Laptop', laptopSchema);
+module.exports = mongoose.model('Desktop', desktopSchema);

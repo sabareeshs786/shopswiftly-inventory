@@ -1,6 +1,6 @@
 const commonFields = {
     imageUrl: {
-        type: String,
+        type: [String],
         required: true,
         unique: true
     },
@@ -51,6 +51,14 @@ const commonFields = {
     },
     reviews: {
         type: String,
+    },
+    keywords: {
+        type: String,
+        required: true
+    },
+    highlights: {
+        type: [String],
+        required: true
     },
 }
 
