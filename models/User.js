@@ -13,11 +13,10 @@ const adminEditorSchema = new Schema({
         unique: true
     },
     roles: {
-        User: {
+        Editor: {
             type: Number,
-            default: 2001
+            default: 1984078
         },
-        Editor: Number,
         Admin: Number
     },
     password: {
@@ -28,6 +27,9 @@ const adminEditorSchema = new Schema({
         type: String,
         required: false,
     }
-});
+}, {timestamps: true});
+
+adminEditorSchema.index({email: 1}, {unique: true});
+adminEditorSchema.index({phno: 1}, {unique: true});
 
 module.exports = mongoose.model('AdminEditor', adminEditorSchema, 'admineditors');

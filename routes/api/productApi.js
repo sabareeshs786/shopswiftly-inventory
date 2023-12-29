@@ -3,6 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const productController = require('../../controller/productController');
+const verifyRoles = require('../../middleware/verifyRoles');
+const ROLES_LIST = require('../../config/roles_list');
 
 const uploader = async (req, res, next) => {
     try {
@@ -25,8 +27,8 @@ const uploader = async (req, res, next) => {
 }
 
 router.route('/:category')
-    .get(productController.getProduct)
+    .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), productController.getProduct)
     
-router.post('/add-product', uploader, productController.addProduct)
+router.post('/add-product', verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), uploader, productController.addProduct)
 
 module.exports = router;

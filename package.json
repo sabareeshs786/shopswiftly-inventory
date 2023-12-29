@@ -1,7 +1,7 @@
 {
-  "name": "editor",
+  "name": "product-server",
   "version": "1.0.0",
-  "description": "This is the ui of the editor role",
+  "description": "This is the ui to include products in the database",
   "main": "server.js",
   "scripts": {
     "start": "node server",
@@ -18,13 +18,13 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
     "multer": "^1.4.5-lts.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",
     "mongodb-memory-server": "^9.1.3",
-    "mongoose": "^8.0.3",
     "nodemon": "^3.0.2"
   }
 }

@@ -2,7 +2,7 @@ const url = require('url');
 const querystring = require('querystring');
 const mongoose = require('mongoose');
 const { getNonNullUndefinedProperties } = require('../utils/utilFunctions');
-const Mobile = require('../models/mobiles');
+const Mobile = require('../models/products/electronics/mobiles');
 
 const getProducts = async (req, res) => {
     const parsedUrl = url.parse(req.url);

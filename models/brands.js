@@ -11,6 +11,12 @@ const brandSchema = new Schema({
         type: String,
         required: true,
         unique: false
+    },
+    parentCategory: {
+        type: String,
+        required: true,
+        unique: false,
+        default: null
     }
 }, {timestamps: true});
 
