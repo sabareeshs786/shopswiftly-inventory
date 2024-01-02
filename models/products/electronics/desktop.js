@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { commonFields } = require('../../../utils/fieldUtils');
+const { commonFields } = require('../../../utils/models/fieldUtils');
 const Schema = mongoose.Schema;
 
 const desktopSchema = new Schema({

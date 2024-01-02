@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { commonFields, clothingFields } = require('../../../../utils/fieldUtils');
+const { commonFields, clothingFields } = require('../../../../utils/models/fieldUtils');
 
 const topwearSchema = new Schema({
     ...commonFields,

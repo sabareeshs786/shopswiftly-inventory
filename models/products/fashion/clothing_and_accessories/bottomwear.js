@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { commonFields } = require('../../../../utils/fieldUtils');
+const { commonFields } = require('../../../../utils/models/fieldUtils');
 
 const bottomwearSchema = new Schema({
     ...commonFields,

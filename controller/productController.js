@@ -3,6 +3,12 @@ const querystring = require('querystring');
 const mongoose = require('mongoose');
 const { getNonNullUndefinedProperties } = require('../utils/utilFunctions');
 const Mobile = require('../models/products/electronics/mobiles');
+const Laptop = require('../models/products/electronics/laptops');
+const Desktop = require('../models/products/electronics/desktop');
+const Tablet = require('../models/products/electronics/tablets');
+const Topwear = require('../models/products/fashion/clothing_and_accessories/topwear');
+const Bottomwear = require('../models/products/fashion/clothing_and_accessories/bottomwear');
+const Footwear = require('../models/products/fashion/footwear');
 
 const getProducts = async (req, res) => {
     const parsedUrl = url.parse(req.url);
@@ -165,16 +171,73 @@ const getProduct = async (req, res) => {
 
 const addProduct = async (req, res) => {
     try {
-        const { name, description, price, brand, ram, storage, batteryCapacity } = req.body;
+        const category = req.params.category;
+        const { skuid, disname, desc, bcCode, catePath,
+            sp, mp, offer, currency, rating, noOfRatings,
+            reviews, noOfReviews, keywords, highlights,
+            availability, sellers } = req.body;
+        const requiredFields = {
+            skuid, disname, desc, bcCode, catePath,
+            sp, mp, offer, currency, rating, noOfRatings,
+            reviews, noOfReviews, keywords, highlights,
+            availability, sellers
+        };
         const imageUrl = req.file.filename;
-        const notNullUndefined = getNonNullUndefinedProperties({ name, description, price, brand, ram, storage, batteryCapacity, imageUrl });
+        let schema;
+        let fields = {requiredFields, imageUrl};
 
-        const newImage = new Mobile(notNullUndefined);
-        await newImage.save();
+        if (!isvalidInputData(requiredFields))
+            throw { code: 400, message: "Invalid input data" };
+
+        switch (category) {
+            case 'mobiles':
+                console.log("Mobiles category");
+                schema = Mobile;
+                fields = {...fields, };
+                break;
+            case 'laptops':
+                console.log("Laptop category");
+                schema = Laptop;
+                fields = {...fields,};
+                break;
+            case 'desktops':
+                console.log("Desktops category");
+                schema = Desktop;
+                fields = {...fields,};
+                break;
+            case 'tablets':
+                console.log("Tablets category");
+                schema = Tablet;
+                fields = {...fields,};
+                break;
+            case 'topwears':
+                console.log("Topwear category");
+                schema = Topwear;
+                fields = {...fields,};
+                break;
+            case 'bottomwears':
+                console.log("Bottomwear category");
+                schema = Bottomwear;
+                fields = {...fields,};
+                break;
+            case 'footwears':
+                console.log("Footwear category");
+                schema = Footwear;
+                fields = {...fields,};
+                break;
+            default:
+                console.log("No valid category");
+                return res.status(400).json({ message: "Invalid category" });
+        }
+
+        const newProduct = new schema(fields);
+        await newProduct.save();
 
         res.status(201).json({ message: 'Product saved successfully' });
     } catch (error) {
         console.error(error);
+        if (error.code === 400)
+            return res.status(400).json({ message: error.message });
         res.status(500).json({ error: 'Internal server error' });
     }
 }
