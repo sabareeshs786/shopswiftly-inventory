@@ -10,66 +10,84 @@ const Topwear = require('../models/products/fashion/clothing_and_accessories/top
 const Bottomwear = require('../models/products/fashion/clothing_and_accessories/bottomwear');
 const Footwear = require('../models/products/fashion/footwear');
 
-const efUtils = require('../utils/controller/electronics');
-const fUtils = require('../utils/controller/fashion');
+const efUtils = require('../utils/controller/fields-electronics');
+const fUtils = require('../utils/controller/fields-fashion');
 
 const getProducts = async (req, res) => {
-    const parsedUrl = url.parse(req.url);
-    const queryParams = querystring.parse(parsedUrl.query);
-    const category = req.params.category?.toLowerCase() || "mobiles";
-    const preview = req.query.preview ? String(req.query.preview).toLowerCase() == "true" ? true : String(req.query.preview).toLowerCase() == "false" ? false : true : true;
-    const brand = req.query.brand?.split(',') || ["apple"];
-    const minPrice = queryParams['min-price'] || '';
-    const maxPrice = queryParams['max-price'] || '';
-    const sort = req.query.sort || "low-to-high";
-    const sortOrder = {};
-    const page = Number.parseInt(queryParams['page'] || '1');
-    const pageSize = Number.parseInt(queryParams['pageSize'] || '5');
-    const skip = (page - 1) * pageSize;
+    try {
+        const parsedUrl = url.parse(req.url);
+        const queryParams = querystring.parse(parsedUrl.query);
+        const category = req.params.category?.toLowerCase() || "mobiles";
+        const preview = req.query.preview ? String(req.query.preview).toLowerCase() == "true" ? true : String(req.query.preview).toLowerCase() == "false" ? false : true : true;
+        const brand = req.query.brand?.split(',') || ["apple"];
+        const minPrice = queryParams['min-price'] || '';
+        const maxPrice = queryParams['max-price'] || '';
+        const sort = req.query.sort || "low-to-high";
+        const sortOrder = {};
+        const page = Number.parseInt(queryParams['page'] || '1');
+        const pageSize = Number.parseInt(queryParams['pageSize'] || '5');
+        const skip = (page - 1) * pageSize;
 
-    if (sort.toLowerCase() == "low-to-high") {
-        sortOrder.price = 1
-    }
-    else if (sort.toLowerCase() == "high-to-low") {
-        sortOrder.price = -1;
-    }
-    else {
-        sortOrder.price = 1;
-    }
+        sortOrder.price = sort == "high-to-low" ? -1 : 1;
 
-    let mongodbQuery = {};
-    let priceConditions = [];
+        let mongodbQuery = {};
+        let priceConditions = [];
 
-    if (Boolean(minPrice) && Boolean(maxPrice)) {
-        priceConditions.push({ price: { $gte: minPrice } });
-        priceConditions.push({ price: { $lte: maxPrice } });
-    }
-    else if (Boolean(minPrice)) {
-        priceConditions.push({ price: { $gte: minPrice } })
-    }
-    else if (Boolean(maxPrice)) {
-        priceConditions.push({ price: { $lte: maxPrice } });
-    }
-
-    mongodbQuery = priceConditions.length > 0 ? { $and: priceConditions } : {};
-    mongodbQuery.brand = { $in: brand };
-
-    const fieldsToRetrieve = ["_id", "name", "price", "brand", "ram", "storage", "imageUrl"];
-
-    if (category == "mobiles") {
-        try {
-            if (preview) {
-                const items = await Mobile.find(mongodbQuery).select(fieldsToRetrieve.join(' ')).limit(5).sort(sortOrder);
-                if (!items) return res.status(204).json({ 'message': `No items found for the category ${category}` });
-                res.json(items);
-            } else {
-                const items = await Mobile.find(mongodbQuery).select(fieldsToRetrieve.join(' ')).skip(skip).limit(pageSize).sort(sortOrder);
-                if (!items) return res.status(204).json({ 'message': `No items found for the category ${category}` });
-                res.json(items);
-            }
-        } catch (error) {
-            console.log(error);
+        if (Boolean(minPrice) && Boolean(maxPrice)) {
+            priceConditions.push({ price: { $gte: minPrice } });
+            priceConditions.push({ price: { $lte: maxPrice } });
         }
+        else if (Boolean(minPrice)) {
+            priceConditions.push({ price: { $gte: minPrice } })
+        }
+        else if (Boolean(maxPrice)) {
+            priceConditions.push({ price: { $lte: maxPrice } });
+        }
+
+        mongodbQuery = priceConditions.length > 0 ? { $and: priceConditions } : {};
+        mongodbQuery.brand = { $in: brand };
+
+        const fieldsToRetrieve = ["_id", "name", "price", "brand", "ram", "storage", "imageUrl"];
+        let schema;
+        switch (category) {
+            case 'mobiles':
+                console.log("Mobiles category");
+                schema = Mobile;
+                break;
+            case 'laptops':
+                console.log("Laptop category");
+                schema = Laptop;
+                break;
+            case 'desktops':
+                console.log("Desktops category");
+                schema = Desktop;
+                break;
+            case 'tablets':
+                console.log("Tablets category");
+                schema = Tablet;
+                break;
+            case 'topwears':
+                console.log("Topwear category");
+                schema = Topwear;
+                break;
+            case 'bottomwears':
+                console.log("Bottomwear category");
+                schema = Bottomwear;
+                break;
+            case 'footwears':
+                console.log("Footwear category");
+                schema = Footwear;
+                break;
+            default:
+                console.log("No valid category");
+                return res.status(400).json({ message: "Invalid category" });
+        }
+        
+        const items = await schema.find(mongodbQuery).select(fieldsToRetrieve.join(' ')).skip(preview ? 0 : skip).limit(preview ? 5 : pageSize).sort(sortOrder);
+        if (!items) return res.status(204).json({ 'message': `No items found for the category ${category}` });
+        res.json(items);
+    } catch (error) {
+        console.log(error);
     }
 }
 
@@ -187,7 +205,7 @@ const addProduct = async (req, res) => {
         };
         const imageUrl = req.file.filename;
         let schema;
-        let fields = {requiredFields, imageUrl};
+        let fields = { requiredFields, imageUrl };
 
         if (!isvalidInputData(requiredFields))
             throw { code: 400, message: "Invalid input data" };
@@ -196,37 +214,37 @@ const addProduct = async (req, res) => {
             case 'mobiles':
                 console.log("Mobiles category");
                 schema = Mobile;
-                fields = {...fields, ...efUtils.getMobileFields(req)};
+                fields = { ...fields, ...efUtils.getMobileFields(req) };
                 break;
             case 'laptops':
                 console.log("Laptop category");
                 schema = Laptop;
-                fields = {...fields, ...efUtils.getLaptopFields(req)};
+                fields = { ...fields, ...efUtils.getLaptopFields(req) };
                 break;
             case 'desktops':
                 console.log("Desktops category");
                 schema = Desktop;
-                fields = {...fields, ...efUtils.getDesktopFields(req)};
+                fields = { ...fields, ...efUtils.getDesktopFields(req) };
                 break;
             case 'tablets':
                 console.log("Tablets category");
                 schema = Tablet;
-                fields = {...fields, ...efUtils.getTabletFields(req)};
+                fields = { ...fields, ...efUtils.getTabletFields(req) };
                 break;
             case 'topwears':
                 console.log("Topwear category");
                 schema = Topwear;
-                fields = {...fields, ...fUtils.getGenericFields(req), ...fUtils.getTopwearFields(req)};
+                fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getTopwearFields(req) };
                 break;
             case 'bottomwears':
                 console.log("Bottomwear category");
                 schema = Bottomwear;
-                fields = {...fields, ...fUtils.getGenericFields(req), ...fUtils.getBottomWearFields(req)};
+                fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getBottomWearFields(req) };
                 break;
             case 'footwears':
                 console.log("Footwear category");
                 schema = Footwear;
-                fields = {...fields, ...fUtils.getGenericFields(req), ...fUtils.getFootWearFields(req)};
+                fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getFootWearFields(req) };
                 break;
             default:
                 console.log("No valid category");

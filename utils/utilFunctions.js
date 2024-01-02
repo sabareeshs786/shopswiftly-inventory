@@ -41,4 +41,8 @@ const removeEmptyFields = (fields) => {
   return fields;
 }
 
+const getGenericFilters = (req) => {
+  
+}
+
 module.exports = { getNonNullUndefinedProperties, isvalidInputData, removeEmptyFields };
