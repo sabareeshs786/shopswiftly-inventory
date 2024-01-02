@@ -10,6 +10,9 @@ const Topwear = require('../models/products/fashion/clothing_and_accessories/top
 const Bottomwear = require('../models/products/fashion/clothing_and_accessories/bottomwear');
 const Footwear = require('../models/products/fashion/footwear');
 
+const efUtils = require('../utils/controller/electronics');
+const fUtils = require('../utils/controller/fashion');
+
 const getProducts = async (req, res) => {
     const parsedUrl = url.parse(req.url);
     const queryParams = querystring.parse(parsedUrl.query);
@@ -193,37 +196,37 @@ const addProduct = async (req, res) => {
             case 'mobiles':
                 console.log("Mobiles category");
                 schema = Mobile;
-                fields = {...fields, };
+                fields = {...fields, ...efUtils.getMobileFields(req)};
                 break;
             case 'laptops':
                 console.log("Laptop category");
                 schema = Laptop;
-                fields = {...fields,};
+                fields = {...fields, ...efUtils.getLaptopFields(req)};
                 break;
             case 'desktops':
                 console.log("Desktops category");
                 schema = Desktop;
-                fields = {...fields,};
+                fields = {...fields, ...efUtils.getDesktopFields(req)};
                 break;
             case 'tablets':
                 console.log("Tablets category");
                 schema = Tablet;
-                fields = {...fields,};
+                fields = {...fields, ...efUtils.getTabletFields(req)};
                 break;
             case 'topwears':
                 console.log("Topwear category");
                 schema = Topwear;
-                fields = {...fields,};
+                fields = {...fields, ...fUtils.getGenericFields(req), ...fUtils.getTopwearFields(req)};
                 break;
             case 'bottomwears':
                 console.log("Bottomwear category");
                 schema = Bottomwear;
-                fields = {...fields,};
+                fields = {...fields, ...fUtils.getGenericFields(req), ...fUtils.getBottomWearFields(req)};
                 break;
             case 'footwears':
                 console.log("Footwear category");
                 schema = Footwear;
-                fields = {...fields,};
+                fields = {...fields, ...fUtils.getGenericFields(req), ...fUtils.getFootWearFields(req)};
                 break;
             default:
                 console.log("No valid category");

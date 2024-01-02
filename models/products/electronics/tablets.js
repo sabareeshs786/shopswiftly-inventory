@@ -109,6 +109,7 @@ const tabletSchema = new Schema({
             type: String
         }
     },
+    
     speciality: {
         type: String
     },

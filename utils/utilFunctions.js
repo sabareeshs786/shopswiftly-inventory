@@ -25,4 +25,20 @@ function isvalidInputData(dataObject) {
   return true;
 }
 
-module.exports = { getNonNullUndefinedProperties, isvalidInputData };
+const removeEmptyFields = (fields) => {
+  for (const key of Object.keys(fields)) {
+      let value = fields[key];
+      if (typeof value === 'object' && value !== null) {
+          let retObj = removeEmptyFields(value);
+          if (Object.keys(retObj).length === 0)
+              delete fields[key]
+      }
+      else {
+          if (!value)
+              delete fields[key];
+      }
+  }
+  return fields;
+}
+
+module.exports = { getNonNullUndefinedProperties, isvalidInputData, removeEmptyFields };

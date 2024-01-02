@@ -120,7 +120,7 @@ const laptopSchema = new Schema({
                 },
                 unit: {
                     type: String,
-                    enum: ['GB', 'MB'],
+                    enum: ['GB', 'MB', 'TB'],
                     default: 'GB'
                 }
             },
@@ -192,7 +192,7 @@ const laptopSchema = new Schema({
             serviceType: {
                 type: String
             },
-            domesticWarrenty: {
+            domesticWarranty: {
                 type: Number
             }
         }

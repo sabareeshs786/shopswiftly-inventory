@@ -98,7 +98,7 @@ const clothingFields = {
     styleCode: {
         type: String,
     },
-    idealfor: {
+    idealFor: {
         type: [String],
         enum: ["men", "women", "men & women", "kids"]
     },
