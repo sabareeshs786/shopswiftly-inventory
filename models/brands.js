@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const brandSchema = new Schema({
+    bcCode: {
+        type: String,
+        required: true,
+        unique: true
+    },
     brand: {
         type: String,
         required: true,
@@ -12,11 +17,10 @@ const brandSchema = new Schema({
         required: true,
         unique: false
     },
-    parentCategory: {
+    // Category is included in the path
+    path: {
         type: String,
-        required: true,
-        unique: false,
-        default: null
+        required: true
     }
 }, {timestamps: true});
 
