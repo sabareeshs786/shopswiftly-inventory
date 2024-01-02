@@ -5,7 +5,6 @@ const categorySchema = new Schema({
     category: {
         type: String,
         required: true,
-        unique: false
     },
     path: {
         type: String,
@@ -13,4 +12,6 @@ const categorySchema = new Schema({
     }
 }, {timestamps: true});
 
-module.exports = mongoose.model('Brand', categorySchema);
+categorySchema.index({category: 1, path: 1}, {unique: true});
+
+module.exports = mongoose.model('Category', categorySchema, 'categories');

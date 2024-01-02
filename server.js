@@ -37,6 +37,7 @@ app.use(verifyJWT);
 app.use('/products', require('./routes/api/productsApi'));
 app.use('/product', require('./routes/api/productApi'));
 app.use('/brands', require('./routes/api/brandsApi'));
+app.use('/categories', require('./routes/api/categoryApi'));
 
 app.use(errorHandler);
 

@@ -10,12 +10,10 @@ const brandSchema = new Schema({
     brand: {
         type: String,
         required: true,
-        unique: false
     },
     category: {
         type: String,
         required: true,
-        unique: false
     },
     // Category is included in the path
     path: {
