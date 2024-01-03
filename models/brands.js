@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const brandSchema = new Schema({
     bcCode: {
-        type: String,
+        type: Number,
         required: true,
         unique: true
     },

@@ -1,7 +1,8 @@
 const url = require('url');
 const querystring = require('querystring');
 const mongoose = require('mongoose');
-const { getNonNullUndefinedProperties } = require('../utils/utilFunctions');
+const { getGenericFilters } = require('../utils/utilFunctions');
+const Brand = require('../models/brands');
 const Mobile = require('../models/products/electronics/mobiles');
 const Laptop = require('../models/products/electronics/laptops');
 const Desktop = require('../models/products/electronics/desktop');
@@ -12,43 +13,25 @@ const Footwear = require('../models/products/fashion/footwear');
 
 const efUtils = require('../utils/controller/fields-electronics');
 const fUtils = require('../utils/controller/fields-fashion');
+const { getNextIdCode } = require('./nextIdCodeController');
 
 const getProducts = async (req, res) => {
     try {
         const parsedUrl = url.parse(req.url);
         const queryParams = querystring.parse(parsedUrl.query);
-        const category = req.params.category?.toLowerCase() || "mobiles";
-        const preview = req.query.preview ? String(req.query.preview).toLowerCase() == "true" ? true : String(req.query.preview).toLowerCase() == "false" ? false : true : true;
-        const brand = req.query.brand?.split(',') || ["apple"];
-        const minPrice = queryParams['min-price'] || '';
-        const maxPrice = queryParams['max-price'] || '';
+        const category = req.params.category;
+        const preview = req.query.preview !== "false";
         const sort = req.query.sort || "low-to-high";
         const sortOrder = {};
         const page = Number.parseInt(queryParams['page'] || '1');
         const pageSize = Number.parseInt(queryParams['pageSize'] || '5');
         const skip = (page - 1) * pageSize;
-
         sortOrder.price = sort == "high-to-low" ? -1 : 1;
 
-        let mongodbQuery = {};
-        let priceConditions = [];
-
-        if (Boolean(minPrice) && Boolean(maxPrice)) {
-            priceConditions.push({ price: { $gte: minPrice } });
-            priceConditions.push({ price: { $lte: maxPrice } });
-        }
-        else if (Boolean(minPrice)) {
-            priceConditions.push({ price: { $gte: minPrice } })
-        }
-        else if (Boolean(maxPrice)) {
-            priceConditions.push({ price: { $lte: maxPrice } });
-        }
-
-        mongodbQuery = priceConditions.length > 0 ? { $and: priceConditions } : {};
-        mongodbQuery.brand = { $in: brand };
-
-        const fieldsToRetrieve = ["_id", "name", "price", "brand", "ram", "storage", "imageUrl"];
         let schema;
+        let { mongodbQuery, genFields } = getGenericFilters(req);
+        let fieldsToRetrieve = [...genFields];
+
         switch (category) {
             case 'mobiles':
                 console.log("Mobiles category");
@@ -82,8 +65,13 @@ const getProducts = async (req, res) => {
                 console.log("No valid category");
                 return res.status(400).json({ message: "Invalid category" });
         }
-        
-        const items = await schema.find(mongodbQuery).select(fieldsToRetrieve.join(' ')).skip(preview ? 0 : skip).limit(preview ? 5 : pageSize).sort(sortOrder);
+
+        const items = await schema.find(mongodbQuery)
+            .select(fieldsToRetrieve.join(' '))
+            .skip(preview ? 0 : skip)
+            .limit(preview ? 5 : pageSize)
+            .sort(sortOrder);
+
         if (!items) return res.status(204).json({ 'message': `No items found for the category ${category}` });
         res.json(items);
     } catch (error) {
@@ -121,18 +109,6 @@ const getMinMax = async (req, res) => {
                 }]);
             const { minValue, maxValue } = result[0];
             res.json({ minValue, maxValue });
-        } catch (error) {
-            console.log(error);
-        }
-    }
-}
-
-const getAllBrands = async (req, res) => {
-    const category = req.params.category || "mobiles";
-    if (category.toLowerCase() == "mobiles") {
-        try {
-            const brands = await Mobile.distinct("brand");
-            res.json(brands);
         } catch (error) {
             console.log(error);
         }
@@ -191,24 +167,31 @@ const getProduct = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
+    const session = await mongoose.startSession();
     try {
         const category = req.params.category;
-        const { skuid, disname, desc, bcCode, catePath,
-            sp, mp, offer, currency, rating, noOfRatings,
-            reviews, noOfReviews, keywords, highlights,
+        const { disname, desc, bcCode, catePath,
+            sp, mp, currency, keywords, highlights,
             availability, sellers } = req.body;
         const requiredFields = {
-            skuid, disname, desc, bcCode, catePath,
-            sp, mp, offer, currency, rating, noOfRatings,
-            reviews, noOfReviews, keywords, highlights,
+            disname, desc, bcCode, catePath,
+            sp, mp, currency, keywords, highlights,
             availability, sellers
         };
-        const imageUrl = req.file.filename;
-        let schema;
-        let fields = { requiredFields, imageUrl };
 
         if (!isvalidInputData(requiredFields))
             throw { code: 400, message: "Invalid input data" };
+
+        const brandResponse = await Brand.find({ bcCode: bcCode });
+        if (!brandResponse || brandResponse.length === 0)
+            return res.status(400).json({ message: "Invalid brand-category code" });
+
+        const offer = ((mp - sp) / mp) * 100;
+        const skuid = getNextIdCode("skuid");
+
+        const imageUrl = req.file.filename;
+        let schema;
+        let fields = { requiredFields, imageUrl };
 
         switch (category) {
             case 'mobiles':
@@ -251,8 +234,10 @@ const addProduct = async (req, res) => {
                 return res.status(400).json({ message: "Invalid category" });
         }
 
-        const newProduct = new schema(fields);
-        await newProduct.save();
+        await session.withTransaction(async () => {
+            const newProduct = new schema(fields);
+            await newProduct.save();
+        })
 
         res.status(201).json({ message: 'Product saved successfully' });
     } catch (error) {
@@ -261,6 +246,11 @@ const addProduct = async (req, res) => {
             return res.status(400).json({ message: error.message });
         res.status(500).json({ error: 'Internal server error' });
     }
+    finally {
+        if (session) {
+            session.endSession();
+        }
+    }
 }
 
-module.exports = { getProducts, getMinMax, getAllBrands, getMetaDataForPagination, getProduct, addProduct };
+module.exports = { getProducts, getMinMax, getMetaDataForPagination, getProduct, addProduct };

@@ -23,7 +23,7 @@ const commonFields = {
     },
     // Brand-Category code
     bcCode: {
-        type: String,
+        type: Number,
         required: true,
     },
     // Category path
@@ -60,7 +60,8 @@ const commonFields = {
         type: String,
     },
     noOfReviews: {
-        type: Number
+        type: Number,
+        default: 0
     },
     keywords: {
         type: String,

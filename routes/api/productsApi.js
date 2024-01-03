@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const brandController = require('../../controller/brandController');
 const productController = require('../../controller/productController');
 const verifyRoles = require('../../middleware/verifyRoles');
 const ROLES_LIST = require('../../config/roles_list');
@@ -11,7 +12,7 @@ router.route('/minmax/:category')
     .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), productController.getMinMax);
 
 router.route('/all-brands/:category')
-    .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), productController.getAllBrands);
+    .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), brandController.getAllBrands);
 
 router.route('/get-pagination-data/:category')
     .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), productController.getMetaDataForPagination);
