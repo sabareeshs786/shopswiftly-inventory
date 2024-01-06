@@ -13,7 +13,8 @@ const getBrands = async (req, res) => {
         const page = Number.parseInt(queryParams['page'] || '1');
         const pageSize = Number.parseInt(queryParams['pageSize'] || '5');
         const skip = (page - 1) * pageSize;
-        const dbResponse = await Brand.find().skip(skip).limit(pageSize);
+        const fields = ["-_id", "bcCode", "brand", "category"]
+        const dbResponse = await Brand.find().select(fields.join(' ')).skip(skip).limit(pageSize);
         if (!dbResponse || dbResponse.length === 0) return res.status(204).json({ 'message': `No data found` });
         return res.json(dbResponse);
     } catch (error) {
