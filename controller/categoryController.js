@@ -5,9 +5,9 @@ const Category = require('../models/categories');
 
 const getCategories = async (req, res) => {
     try {
-        const dbResponse = await Category.find();
-        if (!dbResponse || dbResponse.length === 0) return res.status(204).json({ 'message': `No data found` });
-        return res.json(dbResponse);
+        const categories = await Category.find();
+        if (!categories || categories.length === 0) return res.status(204).json({ 'message': `No data found` });
+        return res.json(categories);
     } catch (error) {
         console.log(error);
     }
@@ -55,7 +55,8 @@ const deleteCategory = async (req, res) => {
         if (!isvalidInputData({ id }))
             throw { code: 400, message: "Invalid input data" };
         const dbResponse = await Category.findByIdAndDelete(id);
-        if (!dbResponse) return res.status(404).json({ 'message': 'Data not Found' });
+        if (!dbResponse)
+            return res.status(404).json({ 'message': 'Data not Found' });
         else
             return res.json({ 'message': `Deleted Successfully!` });
     } catch (error) {

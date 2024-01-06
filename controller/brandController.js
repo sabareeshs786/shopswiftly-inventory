@@ -2,7 +2,9 @@ const url = require('url');
 const querystring = require('querystring');
 const { isvalidInputData } = require('../utils/utilFunctions');
 const Brand = require('../models/brands');
-const { getNextIdCode } = require('./nextIdCodeController');
+const { getNextIdCode, resetIdCode } = require('./nextIdCodeController');
+const { productsDBConn } = require('../config/dbConnect');
+const Category = require('../models/categories');
 
 const getBrands = async (req, res) => {
     try {
@@ -22,37 +24,7 @@ const getBrands = async (req, res) => {
 const getAllBrands = async (req, res) => {
     try {
         const category = req.params.category;
-        let schema;
-        switch (category) {
-            case 'mobiles':
-                schema = Mobile;
-                break;
-            case 'laptops':
-                schema = Laptop;
-                break;
-            case 'desktops':
-                schema = Desktop;
-                break;
-            case 'tablets':
-                schema = Tablet;
-                break;
-            case 'topwears':
-                schema = Topwear;
-                break;
-            case 'bottomwears':
-                schema = Bottomwear;
-                break;
-            case 'footwears':
-                schema = Footwear;
-                break;
-            default:
-                console.log("No valid category");
-                return res.status(400).json({ message: "Invalid category" });
-        }
-
-        const bcCodes = await schema.distinct("bcCode");
-        console.log(bcCodes);
-        const brands = await Brand.find({ bcCode: { $in: bcCodes } });
+        const brands = await Brand.find({ category });
         res.json(brands);
     } catch (error) {
         console.log(error);
@@ -60,21 +32,40 @@ const getAllBrands = async (req, res) => {
 }
 
 const addBrand = async (req, res) => {
+    let _id;
+    let value;
+    const session = await productsDBConn.startSession();
     try {
+        await session.startTransaction();
         const { brand, category } = req.body;
         if (!isvalidInputData({ brand, category })) {
             throw { code: 400, message: "Invalid input data" };
         }
-        const bcCode = getNextIdCode("bcCode");
+        const cateRes = await Category.find({ category: category });
+        if (!cateRes || cateRes.length === 0)
+            throw { code: 400, message: "Entered category doesn't exist" }
+        const { bcCode, id } = await getNextIdCode("bcCode");
+        _id = id;
+        value = bcCode;
         const newBrand = new Brand({ bcCode, brand, category });
-        const dbResponse = await newBrand.save();
+        await newBrand.save();
+
+        await session.commitTransaction();
+
         return res.json({ message: `${brand} and ${category} combination saved successfully` });
     } catch (error) {
+        await session.abortTransaction();
+        await resetIdCode(_id, "bcCode", value);
         if (error.code === 11000)
             return res.status(400).json({ message: "Duplicate brand name and category" });
         else if (error.code === 400)
-            return res.status(400).json({ message: "Invalid Input Data" });
+            return res.status(400).json({ message: error.message });
         return res.status(500).json({ message: "Error occurred" });
+    }
+    finally {
+        if (session) {
+            session.endSession();
+        }
     }
 };
 
@@ -116,4 +107,4 @@ const deleteBrand = async (req, res) => {
     }
 }
 
-module.exports = { getBrands, addBrand, updateBrand, deleteBrand, getAllBrands};
+module.exports = { getBrands, addBrand, updateBrand, deleteBrand, getAllBrands };

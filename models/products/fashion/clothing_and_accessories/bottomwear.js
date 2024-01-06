@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { commonFields } = require('../../../../utils/models/fieldUtils');
+const { commonFields, clothingFields } = require('../../../../utils/models/fieldUtils');
+const { productsDBConn } = require('../../../../config/dbConnect');
 
 const bottomwearSchema = new Schema({
     ...commonFields,
@@ -14,4 +15,4 @@ const bottomwearSchema = new Schema({
     },
 });
 
-module.exports = mongoose.model('BottomWear', bottomwearSchema, "bottomwears");
+module.exports = productsDBConn.model('BottomWear', bottomwearSchema, "bottomwears");

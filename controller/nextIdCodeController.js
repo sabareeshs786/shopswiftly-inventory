@@ -2,7 +2,7 @@ const NextIdCode = require('../models/nextIdCode');
 
 const getNextIdCode = async (field) => {
     try {
-        const dbResponse = await NextIdCode.find();
+        let dbResponse = await NextIdCode.find();
         if (!dbResponse || dbResponse.length === 0) {
             const skuid = 1;
             const bcCode = 1;
@@ -11,14 +11,14 @@ const getNextIdCode = async (field) => {
                     skuid: field === "skuid" ? skuid + 1 : skuid,
                     bcCode: field === "bcCode" ? bcCode + 1 : bcCode
                 });
-            const dbResponse = await newNextIdCode.save();
+            await newNextIdCode.save();
             return field === "skuid" ? skuid : field === "bcCode" ? bcCode : null;
         }
         else {
-            const id = dbResponse._id;
-            const skuid = dbResponse.skuid;
-            const bcCode = dbResponse.bcCode;
-            const dbResponse = await NextIdCode.updateOne(
+            const id = dbResponse[0]._id;
+            const skuid = dbResponse[0].skuid;
+            const bcCode = dbResponse[0].bcCode;
+            dbResponse = await NextIdCode.updateOne(
                 { _id: id },
                 {
                     $set:
@@ -29,13 +29,30 @@ const getNextIdCode = async (field) => {
                 });
             if (dbResponse && dbResponse.modifiedCount !== 0)
                 console.log("Update successful");
-            return field === "skuid" ? skuid : field === "bcCode" ? bcCode : null;
+            return {id, skuid, bcCode};
         }
     } catch (error) {
         console.log(error);
     }
 }
 
+const resetIdCode = async (id, field, value) => {
+    const update = {}
+    if(field === "skuid"){
+        update.$set = {skuid: value};
+    }
+    else if(field === "bcCode"){
+        update.$set = {bcCode: value}
+    }
+    else{
+        console.log("Unknown field");
+        return;
+    }
+    const dbResponse = await NextIdCode.updateOne(
+        { _id: id }, update
+    );
+    if (dbResponse && dbResponse.modifiedCount !== 0)
+        console.log("Reset successful");
+}
 
-
-module.exports = { getNextIdCode };
+module.exports = { getNextIdCode, resetIdCode };

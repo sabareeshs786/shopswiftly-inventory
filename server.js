@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const connectDB = require('./config/dbConnect');
+const { loginDBConn, productsDBConn } = require('./config/dbConnect');
 const cors = require('cors');
 const corsOptions = require('./config/corsOptions');
 
@@ -13,8 +13,6 @@ const credentials = require('./middleware/credentials');
 
 const app = express();
 const PORT = process.env.PORT || 3501;
-
-connectDB();
 
 app.use(logger);
 app.use(credentials);
@@ -41,6 +39,13 @@ app.use('/categories', require('./routes/api/categoryApi'));
 
 app.use(errorHandler);
 
-mongoose.connection.once('open', () => {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
+Promise.all([
+  new Promise(resolve => loginDBConn.once('connected', resolve)),
+  new Promise(resolve => productsDBConn.once('connected', resolve)),
+])
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((err) => {
+    console.log("Error in connecting");
+  });

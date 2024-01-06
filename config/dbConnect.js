@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const connectDB = async () => {
+const connectDB = (dbUri) => {
     try {
-        await mongoose.connect(process.env.DATABASE_URI, {
+        return mongoose.createConnection(dbUri, {
             useUnifiedTopology: true,
             useNewUrlParser: true,
             autoIndex: true
@@ -10,6 +10,9 @@ const connectDB = async () => {
     } catch (err) {
         console.error(err);
     }
-}
+};
 
-module.exports = connectDB;
+const loginDBConn = connectDB(process.env.DATABASE_URI_Login);
+const productsDBConn =  connectDB(process.env.DATABASE_URI_Products);
+
+module.exports = { loginDBConn, productsDBConn };

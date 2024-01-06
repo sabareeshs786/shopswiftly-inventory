@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const { commonFields } = require('../../../utils/models/fieldUtils');
+const { productsDBConn } = require('../../../config/dbConnect');
 
 const mobileSchema = new Schema({
     ...commonFields,
@@ -123,4 +124,4 @@ const mobileSchema = new Schema({
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Mobile', mobileSchema);
+module.exports = productsDBConn.model('Mobile', mobileSchema);

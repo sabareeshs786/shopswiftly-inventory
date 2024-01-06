@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { loginDBConn } = require('../config/dbConnect');
 const Schema = mongoose.Schema;
 
 const adminEditorSchema = new Schema({
@@ -32,4 +33,4 @@ const adminEditorSchema = new Schema({
 adminEditorSchema.index({email: 1}, {unique: true});
 adminEditorSchema.index({phno: 1}, {unique: true});
 
-module.exports = mongoose.model('AdminEditor', adminEditorSchema, 'admineditors');
+module.exports = loginDBConn.model('AdminEditor', adminEditorSchema, 'admineditors');

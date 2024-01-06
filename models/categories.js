@@ -1,17 +1,18 @@
 const mongoose = require('mongoose');
+const { productsDBConn } = require('../config/dbConnect');
 const Schema = mongoose.Schema;
 
 const categorySchema = new Schema({
     category: {
         type: String,
         required: true,
+        unique: true
     },
     path: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     }
 }, {timestamps: true});
 
-categorySchema.index({category: 1, path: 1}, {unique: true});
-
-module.exports = mongoose.model('Category', categorySchema, 'categories');
+module.exports = productsDBConn.model('Category', categorySchema, 'categories');

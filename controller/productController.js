@@ -28,45 +28,45 @@ const getProducts = async (req, res) => {
         const skip = (page - 1) * pageSize;
         sortOrder.price = sort == "high-to-low" ? -1 : 1;
 
-        let schema;
+        let model;
         let { mongodbQuery, genFields } = getGenericFilters(req);
         let fieldsToRetrieve = [...genFields];
 
         switch (category) {
             case 'mobiles':
                 console.log("Mobiles category");
-                schema = Mobile;
+                model = Mobile;
                 break;
             case 'laptops':
                 console.log("Laptop category");
-                schema = Laptop;
+                model = Laptop;
                 break;
             case 'desktops':
                 console.log("Desktops category");
-                schema = Desktop;
+                model = Desktop;
                 break;
             case 'tablets':
                 console.log("Tablets category");
-                schema = Tablet;
+                model = Tablet;
                 break;
             case 'topwears':
                 console.log("Topwear category");
-                schema = Topwear;
+                model = Topwear;
                 break;
             case 'bottomwears':
                 console.log("Bottomwear category");
-                schema = Bottomwear;
+                model = Bottomwear;
                 break;
             case 'footwears':
                 console.log("Footwear category");
-                schema = Footwear;
+                model = Footwear;
                 break;
             default:
                 console.log("No valid category");
                 return res.status(400).json({ message: "Invalid category" });
         }
 
-        const items = await schema.find(mongodbQuery)
+        const items = await model.find(mongodbQuery)
             .select(fieldsToRetrieve.join(' '))
             .skip(preview ? 0 : skip)
             .limit(preview ? 5 : pageSize)
@@ -190,43 +190,43 @@ const addProduct = async (req, res) => {
         const skuid = getNextIdCode("skuid");
 
         const imageUrl = req.file.filename;
-        let schema;
+        let model;
         let fields = { requiredFields, imageUrl };
 
         switch (category) {
             case 'mobiles':
                 console.log("Mobiles category");
-                schema = Mobile;
+                model = Mobile;
                 fields = { ...fields, ...efUtils.getMobileFields(req) };
                 break;
             case 'laptops':
                 console.log("Laptop category");
-                schema = Laptop;
+                model = Laptop;
                 fields = { ...fields, ...efUtils.getLaptopFields(req) };
                 break;
             case 'desktops':
                 console.log("Desktops category");
-                schema = Desktop;
+                model = Desktop;
                 fields = { ...fields, ...efUtils.getDesktopFields(req) };
                 break;
             case 'tablets':
                 console.log("Tablets category");
-                schema = Tablet;
+                model = Tablet;
                 fields = { ...fields, ...efUtils.getTabletFields(req) };
                 break;
             case 'topwears':
                 console.log("Topwear category");
-                schema = Topwear;
+                model = Topwear;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getTopwearFields(req) };
                 break;
             case 'bottomwears':
                 console.log("Bottomwear category");
-                schema = Bottomwear;
+                model = Bottomwear;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getBottomWearFields(req) };
                 break;
             case 'footwears':
                 console.log("Footwear category");
-                schema = Footwear;
+                model = Footwear;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getFootWearFields(req) };
                 break;
             default:
@@ -235,7 +235,7 @@ const addProduct = async (req, res) => {
         }
 
         await session.withTransaction(async () => {
-            const newProduct = new schema(fields);
+            const newProduct = new model(fields);
             await newProduct.save();
         })
 
