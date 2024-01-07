@@ -17,7 +17,7 @@ const getBrands = async (req, res) => {
         const brands = await Brand.find().select(fields.join(' ')).skip(skip).limit(pageSize);
         const totalCount = await Brand.countDocuments();
         if (!brands || brands.length === 0) return res.status(204).json({ 'message': `No data found` });
-        return res.json({brands, totalCount});
+        return res.json({ brands, totalCount });
     } catch (error) {
         return res.status(500).json({ message: "An error occurred while fetching brands" });
     }
@@ -73,11 +73,15 @@ const addBrand = async (req, res) => {
 
 const updateBrand = async (req, res) => {
     try {
-        const { brand, category, id } = req.body;
-        if (!isvalidInputData({ brand, category, id }))
+        const { brand, category, bcCode } = req.body;
+        console.log({brand, category, bcCode});
+        if (!isvalidInputData({ brand, category, bcCode }))
             throw { code: 400, message: "Invalid input data" };
+        const cateRes = await Category.find({ category: category });
+        if (!cateRes || cateRes.length === 0)
+            throw { code: 400, message: "Entered category doesn't exist" }
 
-        const dbResponse = await Brand.updateOne({ _id: id }, { $set: { brand, category } });
+        const dbResponse = await Brand.updateOne({ bcCode: bcCode }, { $set: { brand, category } });
         if (dbResponse && dbResponse.modifiedCount !== 0)
             return res.status(201).json({ message: `Update successfull` });
         res.status(400).json({ message: "Same data entered" });
