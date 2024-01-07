@@ -12,7 +12,7 @@ router.route('/minmax/:category')
     .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), productController.getMinMax);
 
 router.route('/all-brands/:category')
-    .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), brandController.getAllBrands);
+    .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), brandController.getBrandsByCategory);
 
 router.route('/get-pagination-data/:category')
     .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), productController.getMetaDataForPagination);

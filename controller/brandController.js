@@ -14,15 +14,16 @@ const getBrands = async (req, res) => {
         const pageSize = Number.parseInt(queryParams['pageSize'] || '5');
         const skip = (page - 1) * pageSize;
         const fields = ["-_id", "bcCode", "brand", "category"]
-        const dbResponse = await Brand.find().select(fields.join(' ')).skip(skip).limit(pageSize);
-        if (!dbResponse || dbResponse.length === 0) return res.status(204).json({ 'message': `No data found` });
-        return res.json(dbResponse);
+        const brands = await Brand.find().select(fields.join(' ')).skip(skip).limit(pageSize);
+        const totalCount = await Brand.countDocuments();
+        if (!brands || brands.length === 0) return res.status(204).json({ 'message': `No data found` });
+        return res.json({brands, totalCount});
     } catch (error) {
         return res.status(500).json({ message: "An error occurred while fetching brands" });
     }
 }
 
-const getAllBrands = async (req, res) => {
+const getBrandsByCategory = async (req, res) => {
     try {
         const category = req.params.category;
         const brands = await Brand.find({ category });
@@ -108,4 +109,4 @@ const deleteBrand = async (req, res) => {
     }
 }
 
-module.exports = { getBrands, addBrand, updateBrand, deleteBrand, getAllBrands };
+module.exports = { getBrands, addBrand, updateBrand, deleteBrand, getBrandsByCategory };
