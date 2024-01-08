@@ -43,13 +43,13 @@ const addBrand = async (req, res) => {
         if (!isvalidInputData({ brand, category })) {
             throw { code: 400, message: "Invalid input data" };
         }
-        const cateRes = await Category.find({ category: category });
+        const cateRes = await Category.find({ category: category.toLowerCase() });
         if (!cateRes || cateRes.length === 0)
             throw { code: 400, message: "Entered category doesn't exist" }
         const { bcCode, id } = await getNextIdCode("bcCode");
         _id = id;
         value = bcCode;
-        const newBrand = new Brand({ bcCode, brand, category });
+        const newBrand = new Brand({ bcCode, brand: brand.toLowerCase(), category: category.toLowerCase() });
         await newBrand.save();
 
         await session.commitTransaction();
@@ -99,10 +99,10 @@ const deleteBrand = async (req, res) => {
     try {
         const parsedUrl = url.parse(req.url);
         const queryParams = querystring.parse(parsedUrl.query);
-        const id = queryParams['id'];
-        if (!isvalidInputData({ id }))
+        const bcCode = queryParams['bcCode'];
+        if (!isvalidInputData({ bcCode }))
             throw { code: 400, message: "Invalid input data" };
-        const dbResponse = await Brand.findByIdAndDelete(id);
+        const dbResponse = await Brand.deleteOne({bcCode});
         if (!dbResponse) return res.status(404).json({ 'message': 'Data not Found' });
         else
             return res.json({ 'message': `Deleted Successfully!` });
