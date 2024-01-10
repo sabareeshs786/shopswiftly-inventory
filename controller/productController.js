@@ -1,8 +1,11 @@
 const url = require('url');
 const querystring = require('querystring');
 const mongoose = require('mongoose');
-const { getGenericFilters } = require('../utils/utilFunctions');
+const { getGenericFilters, removeEmptyFields, isvalidInputData } = require('../utils/utilFunctions');
+
 const Brand = require('../models/brands');
+const Category = require('../models/categories');
+
 const Mobile = require('../models/products/electronics/mobiles');
 const Laptop = require('../models/products/electronics/laptops');
 const Desktop = require('../models/products/electronics/desktop');
@@ -14,6 +17,7 @@ const Footwear = require('../models/products/fashion/footwear');
 const efUtils = require('../utils/controller/fields-electronics');
 const fUtils = require('../utils/controller/fields-fashion');
 const { getNextIdCode } = require('./nextIdCodeController');
+const { productsDBConn } = require('../config/dbConnect');
 
 const getProducts = async (req, res) => {
     try {
@@ -167,65 +171,76 @@ const getProduct = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
-    const session = await mongoose.startSession();
+    const session = await productsDBConn.startSession();
     try {
         const category = req.params.category;
-        const { disname, desc, bcCode, catePath,
+        const imageFilenames = req.files?.map(file => file.filename);
+        const { disname, desc, brand,
             sp, mp, currency, keywords, highlights,
-            availability, sellers } = req.body;
+            availability, sellers, bestSeller } = req.body;
+        // Below ar the important fields
         const requiredFields = {
-            disname, desc, bcCode, catePath,
-            sp, mp, currency, keywords, highlights,
-            availability, sellers
+            disname, bcCode,
+            sp, mp, keywords,
+            imageFilenames
         };
+        //Below are the unimportant or uncompulsory fields
+        let nonRequiredFields = {
+            desc, currency, highlights, availability, sellers, bestSeller
+        };
+        nonRequiredFields = removeEmptyFields(nonRequiredFields);
+
+        if(nonRequiredFields.highlights)
+            nonRequiredFields.highlights = highlights.split(',').map((e)=>e.trim());
+        
+        if(nonRequiredFields.sellers)
+            nonRequiredFields.sellers = sellers.split(',').map((e)=> e.trim());
+
+        const offer = Math.floor(((mp - sp) / mp) * 100);
 
         if (!isvalidInputData(requiredFields))
             throw { code: 400, message: "Invalid input data" };
 
-        const brandResponse = await Brand.find({ bcCode: bcCode });
+        const categoryResponse = await Category.find({ category });
+        if (!categoryResponse || categoryResponse.length === 0 || categoryResponse.length > 1)
+            return res.status(400).json({ message: "Invalid category" });
+        const catePath = categoryResponse[0].path;
+        if (!catePath)
+            throw new Error("Internal server error");
+
+        const brandResponse = await Brand.find({ brand, category });
         if (!brandResponse || brandResponse.length === 0)
-            return res.status(400).json({ message: "Invalid brand-category code" });
+            return res.status(400).json({ message: "Invalid brand" });
 
-        const offer = ((mp - sp) / mp) * 100;
-        const skuid = getNextIdCode("skuid");
-
-        const imageUrl = req.file.filename;
         let model;
-        let fields = { requiredFields, imageUrl };
+        let fields = { ...requiredFields, ...nonRequiredFields, imageFilenames, offer };
 
         switch (category) {
             case 'mobiles':
-                console.log("Mobiles category");
                 model = Mobile;
                 fields = { ...fields, ...efUtils.getMobileFields(req) };
                 break;
             case 'laptops':
-                console.log("Laptop category");
                 model = Laptop;
                 fields = { ...fields, ...efUtils.getLaptopFields(req) };
                 break;
             case 'desktops':
-                console.log("Desktops category");
                 model = Desktop;
                 fields = { ...fields, ...efUtils.getDesktopFields(req) };
                 break;
             case 'tablets':
-                console.log("Tablets category");
                 model = Tablet;
                 fields = { ...fields, ...efUtils.getTabletFields(req) };
                 break;
             case 'topwears':
-                console.log("Topwear category");
                 model = Topwear;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getTopwearFields(req) };
                 break;
             case 'bottomwears':
-                console.log("Bottomwear category");
                 model = Bottomwear;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getBottomWearFields(req) };
                 break;
             case 'footwears':
-                console.log("Footwear category");
                 model = Footwear;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getFootWearFields(req) };
                 break;
@@ -235,7 +250,8 @@ const addProduct = async (req, res) => {
         }
 
         await session.withTransaction(async () => {
-            const newProduct = new model(fields);
+            const skuid = getNextIdCode("skuid");
+            const newProduct = new model({ ...fields, skuid });
             await newProduct.save();
         })
 

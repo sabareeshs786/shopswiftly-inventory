@@ -4,7 +4,7 @@ const commonFields = {
         required: true,
         unique: true
     },
-    imageUrl: {
+    imageFilenames: {
         type: [String],
         required: true,
         unique: true
