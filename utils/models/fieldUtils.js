@@ -80,7 +80,6 @@ const commonFields = {
     },
     bestSeller: {
         type: Boolean,
-        required: true,
         default: false
     }
 }

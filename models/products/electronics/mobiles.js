@@ -80,10 +80,10 @@ const mobileSchema = new Schema({
             },
         },
         camera: {
-            front: {
+            primary: {
                 type: [Number],
             },
-            rear: {
+            secondary: {
                 type: [Number],
             }
         },

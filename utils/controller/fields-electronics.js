@@ -6,7 +6,7 @@ const getMobileFields = (req) => {
         screenSizeUnit, resolution, resolutionType, os,
         pbrand, pmodel, pnoOfCores, pClockSpeed,
         ramSize, ramUnit, storageSize, storageUnit,
-        frontCamera, rearCamera, batteryCapacity, batteryCapacityUnit,
+        primaryCamera, secondaryCamera, batteryCapacity, batteryCapacityUnit,
         networkType, simType, speciality, features, browseType,
         manufacturerWarranty, inBoxWarrenty
     } = req.body;
@@ -44,8 +44,8 @@ const getMobileFields = (req) => {
                 }
             },
             camera: {
-                front: frontCamera.split(','),
-                rear: rearCamera.split(',')
+                primary: primaryCamera.split(','),
+                secondary: secondaryCamera.split(',')
             },
             batteryCapacity: {
                 size: batteryCapacity,
