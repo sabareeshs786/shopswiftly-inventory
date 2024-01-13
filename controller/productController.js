@@ -175,9 +175,11 @@ const addProduct = async (req, res) => {
     try {
         const category = req.params.category;
         const imageFilenames = req.files?.map(file => file.filename);
+
         const { disname, desc, brand,
             sp, mp, currency, keywords, highlights,
-            availability, sellers, bestSeller } = req.body;
+            availability, sellers, bestSeller,
+             } = req.body;
         // Below ar the important fields
         const requiredFields = {
             disname, bcCode,

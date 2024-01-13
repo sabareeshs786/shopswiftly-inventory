@@ -10,7 +10,13 @@ const getMobileFields = (req) => {
         networkType, simType, speciality, features, browseType,
         manufacturerWarranty, inBoxWarrenty
     } = req.body;
-
+    const requiredFields = {
+        modelNo, modelName, screenSize, ramSize, storageSize,
+        batteryCapacity
+    };
+    
+    if (!isvalidInputData(requiredFields))
+        throw { code: 400, message: "Invalid input data" };
     const fields = {
         specifications: {
             general: {
