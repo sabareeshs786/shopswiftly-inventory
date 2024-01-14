@@ -94,7 +94,7 @@ const mobileSchema = new Schema({
             },
             unit: {
                 type: String,
-                enum: ['mAh'],
+                required: true,
                 default: 'mAh'
             }
         },
