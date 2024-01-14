@@ -59,4 +59,11 @@ const getGenericFilters = (req) => {
   return { mongodbQuery, genFields };
 }
 
-module.exports = { isvalidInputData, removeEmptyFields, getGenericFilters };
+const strValToNumVal = (obj) => {
+  Object.entries(obj).forEach(([key, val]) => {
+      obj[key] = Number(val);
+  });
+  return Object.fromEntries(Object.entries(obj).filter(([key, value]) => !Number.isNaN(value)));
+}
+
+module.exports = { isvalidInputData, removeEmptyFields, getGenericFilters, strValToNumVal };

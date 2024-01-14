@@ -10,7 +10,7 @@ const commonFields = {
         unique: true
     },
     // Display name
-    disname: {
+    pname: {
         type: String,
         required: true,
         unique: true

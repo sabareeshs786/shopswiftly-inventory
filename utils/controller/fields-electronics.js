@@ -2,12 +2,12 @@ const { removeEmptyFields } = require('../utilFunctions');
 
 const getMobileFields = (req) => {
     const {
-        modelNo, modelName, color, screenSize,
-        screenSizeUnit, resolution, resolutionType, os,
+        modelNo, modelName, color, screenSizeWidth, screenSizeHeight,
+        screenSizeUnit, resolutionWidth, resolutionHeight, resolutionType, os,
         pbrand, pmodel, pnoOfCores, pClockSpeed,
         ramSize, ramUnit, storageSize, storageUnit,
-        primaryCamera, secondaryCamera, batteryCapacity, batteryCapacityUnit,
-        networkType, simType, speciality, features, browseType,
+        primaryCamera, secondaryCamera, batteryCapacity,
+        networkType, simType, speciality, features,
         manufacturerWarranty, inBoxWarrenty
     } = req.body;
     const requiredFields = {
@@ -17,6 +17,7 @@ const getMobileFields = (req) => {
     
     if (!isvalidInputData(requiredFields))
         throw { code: 400, message: "Invalid input data" };
+
     const fields = {
         specifications: {
             general: {
@@ -55,14 +56,12 @@ const getMobileFields = (req) => {
             },
             batteryCapacity: {
                 size: batteryCapacity,
-                unit: batteryCapacityUnit
             },
             networkType,
             simType
         },
         speciality,
         features,
-        browseType,
         manufacturerWarranty,
         inBoxWarrenty
     };

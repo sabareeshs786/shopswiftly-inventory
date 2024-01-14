@@ -176,13 +176,14 @@ const addProduct = async (req, res) => {
         const category = req.params.category;
         const imageFilenames = req.files?.map(file => file.filename);
 
-        const { disname, desc, brand,
-            sp, mp, currency, keywords, highlights,
-            availability, sellers, bestSeller,
-             } = req.body;
-        // Below ar the important fields
+        const { pname, brand, currency,
+            highlights, desc, keywords, sellers,
+            availability, bestSeller,
+        } = req.body;
+        const { mp, sp } = strValToNumVal({ mp: req.body?.mp, sp: req.body?.sp });
+
         const requiredFields = {
-            disname, bcCode,
+            pname, brand, category,
             sp, mp, keywords,
             imageFilenames
         };
@@ -192,11 +193,11 @@ const addProduct = async (req, res) => {
         };
         nonRequiredFields = removeEmptyFields(nonRequiredFields);
 
-        if(nonRequiredFields.highlights)
-            nonRequiredFields.highlights = highlights.split(',').map((e)=>e.trim());
-        
-        if(nonRequiredFields.sellers)
-            nonRequiredFields.sellers = sellers.split(',').map((e)=> e.trim());
+        if (nonRequiredFields.highlights)
+            nonRequiredFields.highlights = highlights.split('\n').map((e) => e.trim());
+
+        if (nonRequiredFields.sellers)
+            nonRequiredFields.sellers = sellers.split('\n').map((e) => e.trim());
 
         const offer = Math.floor(((mp - sp) / mp) * 100);
 
@@ -213,9 +214,12 @@ const addProduct = async (req, res) => {
         const brandResponse = await Brand.find({ brand, category });
         if (!brandResponse || brandResponse.length === 0)
             return res.status(400).json({ message: "Invalid brand" });
+        const bcCode = brandResponse[0].bcCode;
+        if (!bcCode)
+            throw new Error("Internal server error");
 
         let model;
-        let fields = { ...requiredFields, ...nonRequiredFields, imageFilenames, offer };
+        let fields = { ...requiredFields, ...nonRequiredFields, imageFilenames, offer, catePath, bcCode };
 
         switch (category) {
             case 'mobiles':

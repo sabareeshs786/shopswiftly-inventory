@@ -90,11 +90,9 @@ const mobileSchema = new Schema({
         batteryCapacity: {
             size: {
                 type: Number,
-                required: true
             },
             unit: {
                 type: String,
-                required: true,
                 default: 'mAh'
             }
         },
