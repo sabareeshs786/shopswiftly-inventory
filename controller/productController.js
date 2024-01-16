@@ -1,7 +1,7 @@
 const url = require('url');
 const querystring = require('querystring');
 const mongoose = require('mongoose');
-const { getGenericFilters, removeEmptyFields, isvalidInputData } = require('../utils/utilFunctions');
+const { getGenericFilters, removeEmptyFields, isvalidInputData, strValToNumVal } = require('../utils/utilFunctions');
 
 const Brand = require('../models/brands');
 const Category = require('../models/categories');
@@ -16,7 +16,7 @@ const Footwear = require('../models/products/fashion/footwear');
 
 const efUtils = require('../utils/controller/fields-electronics');
 const fUtils = require('../utils/controller/fields-fashion');
-const { getNextIdCode } = require('./nextIdCodeController');
+const { getNextIdCode, resetIdCode } = require('./nextIdCodeController');
 const { productsDBConn } = require('../config/dbConnect');
 
 const getProducts = async (req, res) => {
@@ -171,8 +171,11 @@ const getProduct = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
+    let _id;
+    let value;
     const session = await productsDBConn.startSession();
     try {
+        await session.startTransaction();
         const category = req.params.category;
         const imageFilenames = req.files?.map(file => file.filename);
 
@@ -194,10 +197,10 @@ const addProduct = async (req, res) => {
         nonRequiredFields = removeEmptyFields(nonRequiredFields);
 
         if (nonRequiredFields.highlights)
-            nonRequiredFields.highlights = highlights.split('\n').map((e) => e.trim());
+            nonRequiredFields.highlights = highlights.split(/[,\n]/).map((e) => e.trim());
 
         if (nonRequiredFields.sellers)
-            nonRequiredFields.sellers = sellers.split('\n').map((e) => e.trim());
+            nonRequiredFields.sellers = sellers.split(/[,\n]/).map((e) => e.trim());
 
         const offer = Math.floor(((mp - sp) / mp) * 100);
 
@@ -255,22 +258,28 @@ const addProduct = async (req, res) => {
                 return res.status(400).json({ message: "Invalid category" });
         }
 
-        await session.withTransaction(async () => {
-            const skuid = getNextIdCode("skuid");
-            const newProduct = new model({ ...fields, skuid });
-            await newProduct.save();
-        })
+        const { skuid, id } = await getNextIdCode("skuid");
+        _id = id;
+        value = skuid;
+        const newProduct = new model({ ...fields, skuid });
+        await newProduct.save();
+
+        await session.commitTransaction();
 
         res.status(201).json({ message: 'Product saved successfully' });
     } catch (error) {
+        await session.abortTransaction();
+        await resetIdCode(_id, "skuid", value);
         console.error(error);
+        if (error.code === 11000)
+            return res.status(400).json({ message: "Duplicate brand name and category" });
         if (error.code === 400)
             return res.status(400).json({ message: error.message });
         res.status(500).json({ error: 'Internal server error' });
     }
     finally {
         if (session) {
-            session.endSession();
+            await session.endSession();
         }
     }
 }

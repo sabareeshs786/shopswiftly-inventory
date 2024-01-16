@@ -13,6 +13,7 @@ const cookieParser = require('cookie-parser');
 const credentials = require('./middleware/credentials');
 const verifyRoles = require('./middleware/verifyRoles');
 const ROLES_LIST = require('./config/roles_list');
+const { getBrandsByCategory } = require('./controller/brandController');
 
 const app = express();
 const PORT = process.env.PORT || 3501;
@@ -46,6 +47,7 @@ app.use('/logout', require('./routes/authRoutes/logout'));
 app.use(verifyJWT);
 
 app.post('/product/add-product/:category', verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), upload.array('images', 10), require('./controller/productController').addProduct);
+app.get('/get-brands-by-category/:category', getBrandsByCategory);
 app.use('/products', require('./routes/api/productsApi'));
 app.use('/product', require('./routes/api/productApi'));
 app.use('/brands', require('./routes/api/brandsApi'));

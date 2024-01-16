@@ -20,9 +20,9 @@ const mobileSchema = new Schema({
             },
         },
         display: {
-            screenSize: {
+            displaySize: {
                 size: {
-                    type: [Number], // [width, height]
+                    type: Number,
                     required: true
                 },
                 unit: {
@@ -32,7 +32,8 @@ const mobileSchema = new Schema({
                 }
             },
             resolution: {
-                type: [Number]
+                type: [Number],
+                required: true
             },
             resolutionType: {
                 type: String
@@ -74,7 +75,7 @@ const mobileSchema = new Schema({
                 },
                 unit: {
                     type: String,
-                    enum: ['GB', 'MB'],
+                    enum: ['GB', 'MB', 'TB'],
                     default: 'GB'
                 }
             },

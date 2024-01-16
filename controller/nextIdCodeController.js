@@ -12,12 +12,15 @@ const getNextIdCode = async (field) => {
                     bcCode: field === "bcCode" ? bcCode + 1 : bcCode
                 });
             await newNextIdCode.save();
-            return field === "skuid" ? skuid : field === "bcCode" ? bcCode : null;
+            dbResponse = await NextIdCode.find();
+            const id = dbResponse[0]._id;
+            return {id, skuid, bcCode};
         }
         else {
             const id = dbResponse[0]._id;
             const skuid = dbResponse[0].skuid;
             const bcCode = dbResponse[0].bcCode;
+            console.log(skuid);
             dbResponse = await NextIdCode.updateOne(
                 { _id: id },
                 {

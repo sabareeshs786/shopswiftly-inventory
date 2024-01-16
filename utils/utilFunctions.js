@@ -64,6 +64,15 @@ const strValToNumVal = (obj) => {
       obj[key] = Number(val);
   });
   return Object.fromEntries(Object.entries(obj).filter(([key, value]) => !Number.isNaN(value)));
+};
+
+const strValToNumArr = (str) => {
+  const strArr = str.split(',');
+  console.log(strArr)
+  let numArr = strArr.map((s) => Number(s));
+  console.log(numArr);
+  numArr = numArr.filter((num) => !Number.isNaN(num) && num !== 0);
+  return numArr.map((n) => Number.parseInt(n, 10));
 }
 
-module.exports = { isvalidInputData, removeEmptyFields, getGenericFilters, strValToNumVal };
+module.exports = { isvalidInputData, removeEmptyFields, getGenericFilters, strValToNumVal, strValToNumArr };

@@ -7,7 +7,6 @@ const commonFields = {
     imageFilenames: {
         type: [String],
         required: true,
-        unique: true
     },
     // Display name
     pname: {
@@ -18,7 +17,6 @@ const commonFields = {
     // Description of the product
     desc: {
         type: String,
-        required: true,
         default: null
     },
     // Brand-Category code
@@ -69,7 +67,6 @@ const commonFields = {
     },
     highlights: {
         type: [String],
-        required: false,
         default: null
     },
     availability: {
@@ -81,6 +78,11 @@ const commonFields = {
     bestSeller: {
         type: Boolean,
         default: false
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        default: 0
     }
 }
 

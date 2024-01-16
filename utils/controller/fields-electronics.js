@@ -1,18 +1,29 @@
-const { removeEmptyFields } = require('../utilFunctions');
+const { removeEmptyFields, strValToNumVal, isvalidInputData, strValToNumArr } = require('../utilFunctions');
 
 const getMobileFields = (req) => {
     const {
-        modelNo, modelName, color, screenSizeWidth, screenSizeHeight,
-        screenSizeUnit, resolutionWidth, resolutionHeight, resolutionType, os,
-        pbrand, pmodel, pnoOfCores, pClockSpeed,
-        ramSize, ramUnit, storageSize, storageUnit,
-        primaryCamera, secondaryCamera, batteryCapacity,
+        modelNo, modelName, color,
+        displaySizeUnit, resolutionType, os,
+        pbrand, pmodel, 
+        ramUnit, storageUnit,
+        primaryCamera, secondaryCamera,
         networkType, simType, speciality, features,
         manufacturerWarranty, inBoxWarrenty
     } = req.body;
+    const numVal = {displaySize: req.body?.displaySize, 
+        resolutionWidth: req.body?.resolutionWidth, 
+        resolutionHeight: req.body?.resolutionHeight, 
+        pnoOfCores: req.body?.pnoOfCores, 
+        pClockSpeed: req.body?.pClockSpeed,
+        ramSize: req.body?.ramSize,
+        storageSize: req.body?.storageSize,
+        batteryCapacity: req.body?.batteryCapacity
+    }
+    const {displaySize, 
+        resolutionWidth, resolutionHeight,
+        pnoOfCores, pClockSpeed, ramSize, storageSize, batteryCapacity} = strValToNumVal(numVal);
     const requiredFields = {
-        modelNo, modelName, screenSize, ramSize, storageSize,
-        batteryCapacity
+        modelNo, modelName, displaySize, resolutionWidth, resolutionHeight, ramSize, storageSize
     };
     
     if (!isvalidInputData(requiredFields))
@@ -26,11 +37,11 @@ const getMobileFields = (req) => {
                 color
             },
             display: {
-                screenSize: {
-                    size: screenSize.split(','),
-                    unit: screenSizeUnit
+                displaySize: {
+                    size: displaySize,
+                    unit: displaySizeUnit
                 },
-                resolution: resolution.split(','),
+                resolution: [resolutionWidth, resolutionHeight],
                 resolutionType
             },
             os,
@@ -51,8 +62,8 @@ const getMobileFields = (req) => {
                 }
             },
             camera: {
-                primary: primaryCamera.split(','),
-                secondary: secondaryCamera.split(',')
+                primary: strValToNumArr(primaryCamera),
+                secondary: strValToNumArr(secondaryCamera)
             },
             batteryCapacity: {
                 size: batteryCapacity,

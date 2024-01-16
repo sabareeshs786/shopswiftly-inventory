@@ -26,10 +26,11 @@ const getBrands = async (req, res) => {
 const getBrandsByCategory = async (req, res) => {
     try {
         const category = req.params.category;
-        const brands = await Brand.find({ category });
+        const fields = ["-_id", "brand",]
+        const brands = await Brand.find({ category }).select(fields);
         res.json(brands);
     } catch (error) {
-        console.log(error);
+        res.status(500).json({message: "Internal server error"})
     }
 }
 
