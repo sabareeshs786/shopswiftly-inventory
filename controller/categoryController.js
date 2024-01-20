@@ -1,7 +1,7 @@
 const url = require('url');
 const querystring = require('querystring');
 const { isvalidInputData } = require('../utils/utilFunctions');
-const Category = require('../models/categories');
+const Category = require('../models-admin/categories');
 
 const getCategories = async (req, res) => {
     try {

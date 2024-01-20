@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { commonFields } = require('../../../utils/models/fieldUtils');
-const { productsDBConn } = require('../../../config/dbConnect');
+const { userProductsDBConn } = require('../../../config/dbConnect');
 const Schema = mongoose.Schema;
 
 const laptopSchema = new Schema({
@@ -202,4 +202,4 @@ const laptopSchema = new Schema({
     },
 });
 
-module.exports = productsDBConn.model('Laptop', laptopSchema);
+module.exports = userProductsDBConn.model('Laptop', laptopSchema);

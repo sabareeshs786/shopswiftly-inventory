@@ -1,10 +1,10 @@
 const url = require('url');
 const querystring = require('querystring');
 const { isvalidInputData } = require('../utils/utilFunctions');
-const Brand = require('../models/brands');
+const Brand = require('../models-admin/brands');
 const { getNextIdCode, resetIdCode } = require('./nextIdCodeController');
 const { productsDBConn } = require('../config/dbConnect');
-const Category = require('../models/categories');
+const Category = require('../models-admin/categories');
 
 const getBrands = async (req, res) => {
     try {

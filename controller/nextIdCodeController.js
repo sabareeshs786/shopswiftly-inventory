@@ -1,4 +1,4 @@
-const NextIdCode = require('../models/nextIdCode');
+const NextIdCode = require('../models-admin/nextIdCode');
 
 const getNextIdCode = async (field) => {
     try {

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { productsDBConn } = require('../config/dbConnect');
+const { adminProductsDBConn } = require('../config/dbConnect');
 const Schema = mongoose.Schema;
 
 const nextIdCodeSchema = Schema({
@@ -11,4 +11,4 @@ const nextIdCodeSchema = Schema({
     },
 }, { timestamps: true });
 
-module.exports = productsDBConn.model('NextIdCode', nextIdCodeSchema, 'nextIdCodes');
+module.exports = adminProductsDBConn.model('NextIdCode', nextIdCodeSchema, 'nextIdCodes');

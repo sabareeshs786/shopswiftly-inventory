@@ -3,16 +3,25 @@ const querystring = require('querystring');
 const mongoose = require('mongoose');
 const { getGenericFilters, removeEmptyFields, isvalidInputData, strValToNumVal } = require('../utils/utilFunctions');
 
-const Brand = require('../models/brands');
-const Category = require('../models/categories');
+const Brand = require('../models-admin/brands');
+const Category = require('../models-admin/categories');
 
-const Mobile = require('../models/products/electronics/mobiles');
-const Laptop = require('../models/products/electronics/laptops');
-const Desktop = require('../models/products/electronics/desktop');
-const Tablet = require('../models/products/electronics/tablets');
-const Topwear = require('../models/products/fashion/clothing_and_accessories/topwear');
-const Bottomwear = require('../models/products/fashion/clothing_and_accessories/bottomwear');
-const Footwear = require('../models/products/fashion/footwear');
+const MobileAdmin = require('../models-admin/products/electronics/mobiles');
+const LaptopAdmin = require('../models-admin/products/electronics/laptops');
+const DesktopAdmin = require('../models-admin/products/electronics/desktop');
+const TabletAdmin = require('../models-admin/products/electronics/tablets');
+const TopwearAdmin = require('../models-admin/products/fashion/clothing_and_accessories/topwear');
+const BottomwearAdmin = require('../models-admin/products/fashion/clothing_and_accessories/bottomwear');
+const FootwearAdmin = require('../models-admin/products/fashion/footwear');
+
+const MobileUser = require('../models-user/products/electronics/mobiles');
+const LaptopUser = require('../models-user/products/electronics/laptops');
+const DesktopUser = require('../models-user/products/electronics/desktop');
+const TabletUser = require('../models-user/products/electronics/tablets');
+const TopwearUser = require('../models-user/products/fashion/clothing_and_accessories/topwear');
+const BottomwearUser = require('../models-user/products/fashion/clothing_and_accessories/bottomwear');
+const FootwearUser = require('../models-user/products/fashion/footwear');
+
 
 const efUtils = require('../utils/controller/fields-electronics');
 const fUtils = require('../utils/controller/fields-fashion');
@@ -39,31 +48,31 @@ const getProducts = async (req, res) => {
         switch (category) {
             case 'mobiles':
                 console.log("Mobiles category");
-                model = Mobile;
+                model = MobileAdmin;
                 break;
             case 'laptops':
                 console.log("Laptop category");
-                model = Laptop;
+                model = LaptopAdmin;
                 break;
             case 'desktops':
                 console.log("Desktops category");
-                model = Desktop;
+                model = DesktopAdmin;
                 break;
             case 'tablets':
                 console.log("Tablets category");
-                model = Tablet;
+                model = TabletAdmin;
                 break;
             case 'topwears':
                 console.log("Topwear category");
-                model = Topwear;
+                model = TopwearAdmin;
                 break;
             case 'bottomwears':
                 console.log("Bottomwear category");
-                model = Bottomwear;
+                model = BottomwearAdmin;
                 break;
             case 'footwears':
                 console.log("Footwear category");
-                model = Footwear;
+                model = FootwearAdmin;
                 break;
             default:
                 console.log("No valid category");
@@ -96,9 +105,9 @@ const getMinMax = async (req, res) => {
     }
     if (category.toLowerCase() == "mobiles") {
         try {
-            const mongodbDocs = await Mobile.find(mongodbQuery);
+            const mongodbDocs = await MobileAdmin.find(mongodbQuery);
             const mongodbDocIds = mongodbDocs.map(doc => doc._id);
-            const result = await Mobile.aggregate([
+            const result = await MobileAdmin.aggregate([
                 {
                     $match: {
                         _id: { $in: mongodbDocIds }
@@ -144,7 +153,7 @@ const getMetaDataForPagination = async (req, res) => {
         mongodbQuery.brand = { $in: brand };
 
         if (category === 'mobiles') {
-            const countOfDocs = await Mobile.countDocuments(mongodbQuery);
+            const countOfDocs = await MobileAdmin.countDocuments(mongodbQuery);
             if (!countOfDocs) return res.status(204).json({ 'message': `No items found for the category ${category}` });
             res.json({ countOfDocs });
         }
@@ -159,7 +168,7 @@ const getProduct = async (req, res) => {
     if (category == "mobiles") {
         try {
             const itemId = new mongoose.Types.ObjectId(String(id));
-            const item = await Mobile.findById(itemId).exec();
+            const item = await MobileAdmin.findById(itemId).exec();
             if (!item) return res.status(204).json({ 'message': `No item found` });
             res.json(item);
         } catch (error) {
@@ -226,31 +235,31 @@ const addProduct = async (req, res) => {
 
         switch (category) {
             case 'mobiles':
-                model = Mobile;
+                model = MobileAdmin;
                 fields = { ...fields, ...efUtils.getMobileFields(req) };
                 break;
             case 'laptops':
-                model = Laptop;
+                model = LaptopAdmin;
                 fields = { ...fields, ...efUtils.getLaptopFields(req) };
                 break;
             case 'desktops':
-                model = Desktop;
+                model = DesktopAdmin;
                 fields = { ...fields, ...efUtils.getDesktopFields(req) };
                 break;
             case 'tablets':
-                model = Tablet;
+                model = TabletAdmin;
                 fields = { ...fields, ...efUtils.getTabletFields(req) };
                 break;
             case 'topwears':
-                model = Topwear;
+                model = TopwearAdmin;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getTopwearFields(req) };
                 break;
             case 'bottomwears':
-                model = Bottomwear;
+                model = BottomwearAdmin;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getBottomWearFields(req) };
                 break;
             case 'footwears':
-                model = Footwear;
+                model = FootwearAdmin;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getFootWearFields(req) };
                 break;
             default:

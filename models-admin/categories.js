@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { productsDBConn } = require('../config/dbConnect');
+const { adminProductsDBConn } = require('../config/dbConnect');
 const Schema = mongoose.Schema;
 
 const categorySchema = new Schema({
@@ -15,4 +15,4 @@ const categorySchema = new Schema({
     }
 }, {timestamps: true});
 
-module.exports = productsDBConn.model('Category', categorySchema, 'categories');
+module.exports = adminProductsDBConn.model('Category', categorySchema, 'categories');

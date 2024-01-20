@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { productsDBConn } = require('../config/dbConnect');
+const { adminProductsDBConn } = require('../config/dbConnect');
 const Schema = mongoose.Schema;
 
 const brandSchema = new Schema({
@@ -20,4 +20,4 @@ const brandSchema = new Schema({
 
 brandSchema.index({ brand: 1, category: 1 }, { unique: true });
 
-module.exports = productsDBConn.model('Brand', brandSchema);
+module.exports = adminProductsDBConn.model('Brand', brandSchema);
