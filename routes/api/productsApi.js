@@ -6,15 +6,15 @@ const verifyRoles = require('../../middleware/verifyRoles');
 const ROLES_LIST = require('../../config/roles_list');
 
 router.route('/:category')
-    .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), productController.getProducts)
+    .get(productController.getProducts)
 
 router.route('/minmax/:category')
-    .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), productController.getMinMax);
+    .get(productController.getMinMax);
 
 router.route('/all-brands/:category')
-    .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), brandController.getBrandsByCategory);
+    .get(brandController.getBrandsByCategory);
 
 router.route('/get-pagination-data/:category')
-    .get(verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), productController.getMetaDataForPagination);
+    .get(productController.getMetaDataForPagination);
 
 module.exports = router;

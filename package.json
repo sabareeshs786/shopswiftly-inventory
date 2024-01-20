@@ -1,7 +1,7 @@
 {
-  "name": "product-server",
+  "name": "shopswiftly-inventory",
   "version": "1.0.0",
-  "description": "This is the ui to include products in the database",
+  "description": "This is a microservice used to add inventory",
   "main": "server.js",
   "scripts": {
     "start": "node server",
@@ -17,9 +17,11 @@
     "date-fns": "^3.0.6",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
     "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
