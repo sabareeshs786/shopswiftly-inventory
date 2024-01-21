@@ -79,7 +79,20 @@ const commonFields = {
         type: Boolean,
         default: false
     },
+}
+
+const commonFieldsAdmin = {
     quantity: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    availableQuantity: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    soldQuantity: {
         type: Number,
         required: true,
         default: 0
@@ -147,4 +160,4 @@ const clothingFields = {
     },
 }
 
-module.exports = { commonFields, clothingFields };
+module.exports = { commonFields, clothingFields, commonFieldsAdmin };

@@ -186,7 +186,7 @@ const addProduct = async (req, res) => {
     try {
         await session.startTransaction();
         const category = req.params.category;
-        const imageFilenames = req.files?.map(file => file.filename);
+        const imageFilenames = req.imageFiles?.map(file => file.filename);
 
         const { pname, brand, currency,
             highlights, desc, keywords, sellers,
@@ -230,36 +230,44 @@ const addProduct = async (req, res) => {
         if (!bcCode)
             throw new Error("Internal server error");
 
-        let model;
+        let modelAdmin;
+        let modelUser;
         let fields = { ...requiredFields, ...nonRequiredFields, imageFilenames, offer, catePath, bcCode };
 
         switch (category) {
             case 'mobiles':
-                model = MobileAdmin;
+                modelAdmin = MobileAdmin;
+                modelUser = MobileUser;
                 fields = { ...fields, ...efUtils.getMobileFields(req) };
                 break;
             case 'laptops':
-                model = LaptopAdmin;
+                modelAdmin = LaptopAdmin;
+                modelUser = LaptopUser;
                 fields = { ...fields, ...efUtils.getLaptopFields(req) };
                 break;
             case 'desktops':
-                model = DesktopAdmin;
+                modelAdmin = DesktopAdmin;
+                modelUser = DesktopUser;
                 fields = { ...fields, ...efUtils.getDesktopFields(req) };
                 break;
             case 'tablets':
-                model = TabletAdmin;
+                modelAdmin = TabletAdmin;
+                modelUser = TabletUser;
                 fields = { ...fields, ...efUtils.getTabletFields(req) };
                 break;
             case 'topwears':
-                model = TopwearAdmin;
+                modelAdmin = TopwearAdmin;
+                modelUser = TopwearUser;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getTopwearFields(req) };
                 break;
             case 'bottomwears':
-                model = BottomwearAdmin;
+                modelAdmin = BottomwearAdmin;
+                modelUser = BottomwearUser;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getBottomWearFields(req) };
                 break;
             case 'footwears':
-                model = FootwearAdmin;
+                modelAdmin = FootwearAdmin;
+                modelUser = FootwearUser;
                 fields = { ...fields, ...fUtils.getGenericFields(req), ...fUtils.getFootWearFields(req) };
                 break;
             default:
@@ -270,8 +278,10 @@ const addProduct = async (req, res) => {
         const { skuid, id } = await getNextIdCode("skuid");
         _id = id;
         value = skuid;
-        const newProduct = new model({ ...fields, skuid });
-        await newProduct.save();
+        const newProductAdmin = new modelAdmin({ ...fields, skuid });
+        await newProductAdmin.save();
+        const newProductUser = new modelUser({...fields, skuid});
+        await newProductUser.save();
 
         await session.commitTransaction();
 

@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { commonFields, clothingFields } = require('../../../../utils/models/fieldUtils');
+const { commonFields, clothingFields, commonFieldsAdmin } = require('../../../../utils/models/fieldUtils');
 const { adminProductsDBConn } = require('../../../../config/dbConnect');
 
 const bottomwearSchema = new Schema({
     ...commonFields,
     ...clothingFields,
+    ...commonFieldsAdmin,
 
     // Sub-categories
     subcate: {

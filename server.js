@@ -15,6 +15,7 @@ const credentials = require('./middleware/credentials');
 const verifyRoles = require('./middleware/verifyRoles');
 const ROLES_LIST = require('./config/roles_list');
 const { getBrandsByCategory } = require('./controller/brandController');
+const { addProduct } = require('./controller/productController');
 
 const app = express();
 const PORT = process.env.PORT || 3501;
@@ -47,7 +48,7 @@ app.use('/product', require('./routes/api/productApi'));
 
 app.use(verifyJWT);
 
-app.post('/product/add-product/:category', verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), async (req, res) => {
+app.post('/product/add-product/:category', verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), async (req, res, next) => {
   try {
     upload(req, res, async (err) => {
       if (err) {
@@ -58,29 +59,27 @@ app.post('/product/add-product/:category', verifyRoles(ROLES_LIST.Admin, ROLES_L
       const formDataToSend = new FormData();
       images.forEach((image, index) => {
         const blob = new Blob([image.buffer], { type: image.mimetype });
-        formDataToSend.append(`images`, blob, image.originalname);
+        formDataToSend.append('images', blob, image.originalname);
       });
-      console.log(req.headers.authorization || req.headers.Authorization);
       const imageServerResponse = await axios.post(
         'http://localhost:3502/images/add',
         formDataToSend,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `${req.headers.authorization || req.headers.Authorization}`, 
+            Authorization: `${req.headers.authorization || req.headers.Authorization}`,
           },
         }
       );
-
-      console.log('Image Server Response:', imageServerResponse.data);
-      
+      req.imageFiles = imageServerResponse?.data?.uploadedFiles;
+      next();
     });
   } catch (error) {
     console.error('Error uploading data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
-// require('./controller/productController').addProduct
+},
+  addProduct
 );
 
 app.get('/get-brands-by-category/:category', verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), getBrandsByCategory);

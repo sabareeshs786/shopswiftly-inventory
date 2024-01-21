@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { commonFields } = require('../../../utils/models/fieldUtils');
+const { commonFields, commonFieldsAdmin } = require('../../../utils/models/fieldUtils');
 const { adminProductsDBConn } = require('../../../config/dbConnect');
 
 const tabletSchema = new Schema({
     ...commonFields,
+    ...commonFieldsAdmin,
     specifications: {
         general: {
             modelNo: {
