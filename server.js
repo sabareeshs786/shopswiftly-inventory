@@ -6,7 +6,6 @@ const corsOptions = require('./config/corsOptions');
 const multer = require('multer');
 const path = require('path');
 const axios = require('axios');
-const bodyParser = require('body-parser');
 
 const { logger } = require('./middleware/logEvents');
 const errorHandler = require('./middleware/errorHandler');
@@ -26,8 +25,8 @@ app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(bodyParser.json());
-
+const storage = multer.memoryStorage(); // Use memory storage for images
+const upload = multer({ storage }).array('images');
 
 // var storage = multer.diskStorage({
 //   destination: function (req, file, cb) {
@@ -50,18 +49,37 @@ app.use(verifyJWT);
 
 app.post('/product/add-product/:category', verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor), async (req, res) => {
   try {
-    const images = req.body.images;
+    upload(req, res, async (err) => {
+      if (err) {
+        console.error('Error uploading images:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      const images = req.files;
+      const formDataToSend = new FormData();
+      images.forEach((image, index) => {
+        const blob = new Blob([image.buffer], { type: image.mimetype });
+        formDataToSend.append(`images`, blob, image.originalname);
+      });
+      console.log(req.headers.authorization || req.headers.Authorization);
+      const imageServerResponse = await axios.post(
+        'http://localhost:3502/images/add',
+        formDataToSend,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `${req.headers.authorization || req.headers.Authorization}`, 
+          },
+        }
+      );
 
-    const imageServerResponse = await axios.post('http://localhost:3502/image/add', { images }, {
+      console.log('Image Server Response:', imageServerResponse.data);
       
     });
-    console.log('Image Server Response:', imageServerResponse.data);
-
   } catch (error) {
     console.error('Error uploading data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}, 
+}
 // require('./controller/productController').addProduct
 );
 
