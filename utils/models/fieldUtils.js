@@ -19,11 +19,6 @@ const commonFields = {
         type: String,
         default: null
     },
-    // Brand-Category code
-    bcCode: {
-        type: Number,
-        required: true,
-    },
     // Category path
     catePath: {
         type: String,
@@ -46,16 +41,13 @@ const commonFields = {
         enum: ['INR', 'USD'],
         default: "INR"
     },
-    rating: {
+    avgRating: {
         type: Number,
         default: 0
     },
     noOfRatings: {
         type: Number,
         default: 0
-    },
-    reviews: {
-        type: String,
     },
     noOfReviews: {
         type: Number,
@@ -82,6 +74,11 @@ const commonFields = {
 }
 
 const commonFieldsAdmin = {
+    // Brand-Category code
+    bcCode: {
+        type: Number,
+        required: true,
+    },
     quantity: {
         type: Number,
         required: true,
@@ -99,8 +96,19 @@ const commonFieldsAdmin = {
     }
 }
 
+const commonFieldsUser = {
+    brand: {
+        type: String,
+        required: true
+    },
+    category: {
+        type: String,
+        required: true
+    }
+}
+
 const clothingFields = {
-    
+
     color: {
         type: String
     },
@@ -160,4 +168,4 @@ const clothingFields = {
     },
 }
 
-module.exports = { commonFields, clothingFields, commonFieldsAdmin };
+module.exports = { commonFields, clothingFields, commonFieldsAdmin, commonFieldsUser };

@@ -67,6 +67,8 @@ const strValToNumVal = (obj) => {
 };
 
 const strValToNumArr = (str) => {
+  if(!str)
+    return null;
   const strArr = str.split(',');
   console.log(strArr)
   let numArr = strArr.map((s) => Number(s));

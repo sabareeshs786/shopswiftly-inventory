@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const { commonFields } = require('../../../utils/models/fieldUtils');
+const { commonFields, commonFieldsUser } = require('../../../utils/models/fieldUtils');
 const { userProductsDBConn } = require('../../../config/dbConnect');
 
 const footwearSchema = new Schema({
     ...commonFields,
+    ...commonFieldsUser,
+    
     subcate: {
         type: String,
         enum: ["shoes", "slippers", "boots", "sneakers", "loafers", "flip-flops"]

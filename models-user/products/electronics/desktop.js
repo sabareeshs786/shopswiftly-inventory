@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
-const { commonFields } = require('../../../utils/models/fieldUtils');
+const { commonFields, commonFieldsUser } = require('../../../utils/models/fieldUtils');
 const { userProductsDBConn } = require('../../../config/dbConnect');
 const Schema = mongoose.Schema;
 
 const desktopSchema = new Schema({
     ...commonFields,
+    ...commonFieldsUser,
     specifications: {
         general: {
             salesPackage: {

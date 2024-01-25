@@ -2,9 +2,10 @@ const url = require('url');
 const querystring = require('querystring');
 const { isvalidInputData } = require('../utils/utilFunctions');
 const Brand = require('../models-admin/brands');
-const { getNextIdCode, resetIdCode } = require('./nextIdCodeController');
-const { productsDBConn } = require('../config/dbConnect');
+const { adminProductsDBConn } = require('../config/dbConnect');
 const Category = require('../models-admin/categories');
+const Counter = require('../models-admin/Counter');
+const mongoose = require('mongoose');
 
 const getBrands = async (req, res) => {
     try {
@@ -30,14 +31,12 @@ const getBrandsByCategory = async (req, res) => {
         const brands = await Brand.find({ category }).select(fields);
         res.json(brands);
     } catch (error) {
-        res.status(500).json({message: "Internal server error"})
+        res.status(500).json({ message: "Internal server error" })
     }
 }
 
 const addBrand = async (req, res) => {
-    let _id;
-    let value;
-    const session = await productsDBConn.startSession();
+    const session = await adminProductsDBConn.startSession();
     try {
         await session.startTransaction();
         const { brand, category } = req.body;
@@ -46,19 +45,22 @@ const addBrand = async (req, res) => {
         }
         const cateRes = await Category.find({ category: category.toLowerCase() });
         if (!cateRes || cateRes.length === 0)
-            throw { code: 400, message: "Entered category doesn't exist" }
-        const { bcCode, id } = await getNextIdCode("bcCode");
-        _id = id;
-        value = bcCode;
-        const newBrand = new Brand({ bcCode, brand: brand.toLowerCase(), category: category.toLowerCase() });
-        await newBrand.save();
+            throw { code: 400, message: "Entered category doesn't exist" };
+        const counter = await Counter.findOneAndUpdate(
+            { field: 'bcCode' },
+            { $inc: { value: 1 } },
+            { new: true, upsert: true, session }
+        );
 
+        const bcCode = counter.value;
+        const newBrand = await Brand.create({ bcCode, brand: brand.toLowerCase(), category: category.toLowerCase() }, { session });
+        console.log(newBrand);
         await session.commitTransaction();
 
         return res.json({ message: `${brand} and ${category} combination saved successfully` });
     } catch (error) {
+        console.log(error);
         await session.abortTransaction();
-        await resetIdCode(_id, "bcCode", value);
         if (error.code === 11000)
             return res.status(400).json({ message: "Duplicate brand name and category" });
         else if (error.code === 400)
@@ -75,7 +77,7 @@ const addBrand = async (req, res) => {
 const updateBrand = async (req, res) => {
     try {
         const { brand, category, bcCode } = req.body;
-        console.log({brand, category, bcCode});
+        console.log({ brand, category, bcCode });
         if (!isvalidInputData({ brand, category, bcCode }))
             throw { code: 400, message: "Invalid input data" };
         const cateRes = await Category.find({ category: category });
@@ -103,7 +105,7 @@ const deleteBrand = async (req, res) => {
         const bcCode = queryParams['bcCode'];
         if (!isvalidInputData({ bcCode }))
             throw { code: 400, message: "Invalid input data" };
-        const dbResponse = await Brand.deleteOne({bcCode});
+        const dbResponse = await Brand.deleteOne({ bcCode });
         if (!dbResponse) return res.status(404).json({ 'message': 'Data not Found' });
         else
             return res.json({ 'message': `Deleted Successfully!` });

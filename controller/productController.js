@@ -3,6 +3,7 @@ const querystring = require('querystring');
 const mongoose = require('mongoose');
 const { getGenericFilters, removeEmptyFields, isvalidInputData, strValToNumVal } = require('../utils/utilFunctions');
 
+const Counter = require('../models-admin/Counter');
 const Brand = require('../models-admin/brands');
 const Category = require('../models-admin/categories');
 
@@ -25,8 +26,7 @@ const FootwearUser = require('../models-user/products/fashion/footwear');
 
 const efUtils = require('../utils/controller/fields-electronics');
 const fUtils = require('../utils/controller/fields-fashion');
-const { getNextIdCode, resetIdCode } = require('./nextIdCodeController');
-const { productsDBConn } = require('../config/dbConnect');
+const { adminProductsDBConn, userProductsDBConn } = require('../config/dbConnect');
 
 const getProducts = async (req, res) => {
     try {
@@ -180,11 +180,12 @@ const getProduct = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
-    let _id;
-    let value;
-    const session = await productsDBConn.startSession();
+    const adminSession = await adminProductsDBConn.startSession();
+    const userSession = await userProductsDBConn.startSession();
+    await adminSession.startTransaction();
+    await userSession.startTransaction();
+
     try {
-        await session.startTransaction();
         const category = req.params.category;
         const imageFilenames = req.imageFiles?.map(file => file.filename);
 
@@ -192,6 +193,9 @@ const addProduct = async (req, res) => {
             highlights, desc, keywords, sellers,
             availability, bestSeller,
         } = req.body;
+        if (!isvalidInputData({ mp: req.body?.mp, sp: req.body?.sp }))
+            throw { code: 400, message: "Invalid input data" };
+
         const { mp, sp } = strValToNumVal({ mp: req.body?.mp, sp: req.body?.sp });
 
         const requiredFields = {
@@ -219,6 +223,7 @@ const addProduct = async (req, res) => {
         const categoryResponse = await Category.find({ category });
         if (!categoryResponse || categoryResponse.length === 0 || categoryResponse.length > 1)
             return res.status(400).json({ message: "Invalid category" });
+
         const catePath = categoryResponse[0].path;
         if (!catePath)
             throw new Error("Internal server error");
@@ -226,6 +231,7 @@ const addProduct = async (req, res) => {
         const brandResponse = await Brand.find({ brand, category });
         if (!brandResponse || brandResponse.length === 0)
             return res.status(400).json({ message: "Invalid brand" });
+        
         const bcCode = brandResponse[0].bcCode;
         if (!bcCode)
             throw new Error("Internal server error");
@@ -274,32 +280,37 @@ const addProduct = async (req, res) => {
                 console.log("No valid category");
                 return res.status(400).json({ message: "Invalid category" });
         }
+        const counter = await Counter.findOneAndUpdate(
+            { field: 'skuid' },
+            { $inc: { value: 1 } },
+            { new: true, upsert: true, session: adminSession }
+        );
 
-        const { skuid, id } = await getNextIdCode("skuid");
-        _id = id;
-        value = skuid;
-        const newProductAdmin = new modelAdmin({ ...fields, skuid });
-        await newProductAdmin.save();
-        const newProductUser = new modelUser({...fields, skuid});
-        await newProductUser.save();
+        const skuid = counter.value;
+        const newProductAdmin = await modelAdmin.create([{ ...fields, skuid }], { session: adminSession });
+        const newProductUser = await modelUser.create([{ ...fields, skuid }], { session: userSession });
 
-        await session.commitTransaction();
-
+        await adminSession.commitTransaction();
+        await userSession.commitTransaction();
         res.status(201).json({ message: 'Product saved successfully' });
     } catch (error) {
-        await session.abortTransaction();
-        await resetIdCode(_id, "skuid", value);
+        await adminSession.abortTransaction();
+        await userSession.abortTransaction();
         console.error(error);
         if (error.code === 11000)
-            return res.status(400).json({ message: "Duplicate brand name and category" });
+            return res.status(400).json({ message: "Duplicate product name" });
         if (error.code === 400)
             return res.status(400).json({ message: error.message });
         res.status(500).json({ error: 'Internal server error' });
     }
     finally {
-        if (session) {
-            await session.endSession();
+        if (adminSession) {
+            adminSession.endSession();
         }
+        if(userSession){
+            userSession.endSession();
+        }
+
     }
 }
 
