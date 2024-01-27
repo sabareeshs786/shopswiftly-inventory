@@ -26,22 +26,8 @@ app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
-const storage = multer.memoryStorage(); // Use memory storage for images
+const storage = multer.memoryStorage();
 const upload = multer({ storage }).array('images');
-
-// var storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, './images');
-//   },
-//   filename: function (req, file, cb) {
-//     cb(null, file.originalname);
-//   },
-// });
-// var upload = multer({ storage: storage });
-
-// Define routes
-// For static files
-// app.use('/images', express.static('images'));
 
 app.use('/products', require('./routes/api/productsApi'));
 app.use('/product', require('./routes/api/productApi'));
