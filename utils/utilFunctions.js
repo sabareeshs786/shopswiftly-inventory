@@ -2,14 +2,13 @@ const url = require('url');
 const querystring = require('querystring');
 
 function isvalidInputData(dataObject) {
-  for (const prop in dataObject) {
-    if (dataObject.hasOwnProperty(prop)) {
-      const value = dataObject[prop];
-      if (!Boolean(value)) {
+  for (const key of Object.keys(dataObject)) {
+      const value = dataObject[key];
+      if (Array.isArray(value) && value.length === 0)
         return false;
-      }
+      else if(value === '' || value === undefined || value === null)
+        return false;
     }
-  }
   return true;
 }
 
@@ -61,9 +60,9 @@ const getGenericFilters = (req) => {
 
 const strValToNumVal = (obj) => {
   Object.entries(obj).forEach(([key, val]) => {
-      obj[key] = Number(val);
+      obj[key] = val === '' || val === undefined || val === null ? null: Number(val);
   });
-  return Object.fromEntries(Object.entries(obj).filter(([key, value]) => !Number.isNaN(value)));
+  return Object.fromEntries(Object.entries(obj).filter(([key, value]) => !Number.isNaN(value) || value === null));
 };
 
 const strValToNumArr = (str) => {

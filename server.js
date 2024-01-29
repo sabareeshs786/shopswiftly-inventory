@@ -42,6 +42,9 @@ app.post('/product/add-product/:category', verifyRoles(ROLES_LIST.Admin, ROLES_L
         return res.status(500).json({ error: 'Internal Server Error' });
       }
       const images = req.files;
+      if(!images || images.length === 0)
+        return res.status(400).json({message: "Invalid input data"})
+      
       const formDataToSend = new FormData();
       images.forEach((image, index) => {
         const blob = new Blob([image.buffer], { type: image.mimetype });
@@ -58,6 +61,8 @@ app.post('/product/add-product/:category', verifyRoles(ROLES_LIST.Admin, ROLES_L
         }
       );
       req.imageFiles = imageServerResponse?.data?.uploadedFiles;
+      if(!req.imageFiles || req.imageFiles?.length === 0)
+        return res.status(500).json({message: "Internal server error"});
       next();
     });
   } catch (error) {

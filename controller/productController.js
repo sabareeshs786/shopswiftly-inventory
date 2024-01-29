@@ -193,16 +193,20 @@ const addProduct = async (req, res) => {
             highlights, desc, keywords, sellers,
             availability, bestSeller,
         } = req.body;
-        if (!isvalidInputData({ mp: req.body?.mp, sp: req.body?.sp }))
-            throw { code: 400, message: "Invalid input data" };
+        let {mp, sp} = req.body;
+        ({ mp, sp } = strValToNumVal({ mp, sp }));
 
-        const { mp, sp } = strValToNumVal({ mp: req.body?.mp, sp: req.body?.sp });
+        // TODO-Check validity of pname, brand category etc,..
 
         const requiredFields = {
             pname, brand, category,
             sp, mp, keywords,
             imageFilenames
         };
+
+        if (!isvalidInputData(requiredFields))
+            return res.status(400).json({message: "Invalid input data"})
+
         //Below are the unimportant or uncompulsory fields
         let nonRequiredFields = {
             desc, currency, highlights, availability, sellers, bestSeller
@@ -217,9 +221,7 @@ const addProduct = async (req, res) => {
 
         const offer = Math.floor(((mp - sp) / mp) * 100);
 
-        if (!isvalidInputData(requiredFields))
-            throw { code: 400, message: "Invalid input data" };
-
+        // Verify Category
         const categoryResponse = await Category.find({ category });
         if (!categoryResponse || categoryResponse.length === 0 || categoryResponse.length > 1)
             return res.status(400).json({ message: "Invalid category" });
@@ -228,6 +230,7 @@ const addProduct = async (req, res) => {
         if (!catePath)
             throw new Error("Internal server error");
 
+        // Verify Brand
         const brandResponse = await Brand.find({ brand, category });
         if (!brandResponse || brandResponse.length === 0)
             return res.status(400).json({ message: "Invalid brand" });
@@ -280,6 +283,7 @@ const addProduct = async (req, res) => {
                 console.log("No valid category");
                 return res.status(400).json({ message: "Invalid category" });
         }
+
         const counter = await Counter.findOneAndUpdate(
             { field: 'skuid' },
             { $inc: { value: 1 } },
