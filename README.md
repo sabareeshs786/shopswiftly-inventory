@@ -44,27 +44,51 @@ Follow the below steps to set up the microservice in your local machine:
 6. **Procure a MongoDB Database Cloud Storage from AWS, GCP or Azure for free by following the below link from MongoDB Atlas**
    Link: https://youtu.be/NcN9S0DR1nU?si=pEJW7jQIBoLwZqIc
 
-7. **Copy the database URI by following the instructions in the above link and paste it in the .env file as mentioned below**
+7. **Copy the database URIs by following the instructions in the above link and paste it in the .env file as mentioned below**
    ```bash
-   DATABASE_URI=COPIED_MONGODB_DATABASE_URI
+   DATABASE_URI_ADMIN_PRODUCTS=COPIED_MONGODB_DATABASE_URI1
+   DATABASE_URI_USER_PRODUCTS=COPIED_MONGODB_DATABASE_URI2
 
-8. **Lastly add the following lines in the .env file and specify email id and password of your own**
-   ```bash
-   ADMIN_EMAIL_ID=ADMIN_EMAIL_ID
-   ADMIN_PASSWORD=ADMIN_PASSWORD
-   ```
-
-9. **Now run the following command to start a node.js server in development mode**
+8. **Now run the following command to start a node.js server in development mode**
     ```bash
     npm run dev
     ```
     
-10. **Install other microservices as well in the following links by following the instructions specified there**
+9. **Install other microservices as well in the following links by following the instructions specified there**
     
-    https://github.com/sabareeshs786/shopswiftly-inventory
+    https://github.com/sabareeshs786/shopswiftly-profile
     
     https://github.com/sabareeshs786/shopswiftly-image-server
     
     https://github.com/sabareeshs786/shopswiftly-admin-ui
     
     https://github.com/sabareeshs786/shopswiftly-user-ui
+
+    https://github.com/sabareeshs786/shopswiftly-listing-display
+
+### Features provided by this microservice
+
+1. **Product's brand management**
+   Used to add, edit and delete the brands of the products in the database with a predefined category
+
+2. **Product management**
+   - Used to add, edit and delete the products with its specifications in the database
+   - Images can also be uploaded
+
+3. **Inventory management**
+   Used to edit the quantity in the inventory of the products that are uploaded
+
+
+### Features implemented in this microservice
+
+1. **Added MongoDB Collection for each category**
+   This is to make read/write operations more efficient
+
+2. **Done backend pagination while fetching data**
+   If the data stored in the database is very large, it is impossible to bring it to the frontend all at once and display. Therefore the pagination is implemented in the backend in order to limit the amount of data that is sent to the frontend
+
+### Features under development
+
+1. Product management
+2. Inventory management
+
