@@ -53,8 +53,7 @@ const addBrand = async (req, res) => {
         );
 
         const bcCode = counter.value;
-        const newBrand = await Brand.create({ bcCode, brand: brand.toLowerCase(), category: category.toLowerCase() }, { session });
-        console.log(newBrand);
+        const newBrand = await Brand.create([{ bcCode, brand: brand.toLowerCase(), category: category.toLowerCase() }], { session });
         await session.commitTransaction();
 
         return res.json({ message: `${brand} and ${category} combination saved successfully` });
